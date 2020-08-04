@@ -2,12 +2,14 @@ package com.safetynet.alerts.controller;
 
 import com.safetynet.alerts.api.model.Person;
 import com.safetynet.alerts.api.response.ChildAlertResponse;
+import com.safetynet.alerts.api.response.CommunityEmailResponse;
 import com.safetynet.alerts.api.response.FireResponse;
 import com.safetynet.alerts.api.response.FloodStationsResponse;
 import com.safetynet.alerts.api.response.PersonInfoResponse;
 import com.safetynet.alerts.api.response.PersonsCoveredByFirestationResponse;
 import com.safetynet.alerts.api.response.PhoneAlertResponse;
 import com.safetynet.alerts.api.validation.constraint.IsAddress;
+import com.safetynet.alerts.api.validation.constraint.IsCity;
 import com.safetynet.alerts.api.validation.constraint.IsName;
 import com.safetynet.alerts.api.validation.constraint.IsStationNumber;
 import com.safetynet.alerts.repository.AddressRepository;
@@ -164,6 +166,23 @@ public class AlertsController {
             res.person(personEntity.toCompletePerson(now, true));
         }
         return res.build();
+    }
+
+    @Operation(
+            summary = "Returns the list of emails of persons living in a city."
+    )
+    @JsonRequestMapping(method = RequestMethod.GET, value = "/communityEmail")
+    @Transactional(readOnly = true)
+    public CommunityEmailResponse getCommunityEmail(
+            @RequestParam("city") @NotNull @IsCity String city
+    ) {
+        List<String> emails = StreamSupport
+                .stream(personRepository.findAllByAddressCity(city).spliterator(), false)
+                .map(PersonEntity::getEmail)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+        return CommunityEmailResponse.builder().emails(emails).build();
     }
 
     public static boolean isAdult(Person person) {
