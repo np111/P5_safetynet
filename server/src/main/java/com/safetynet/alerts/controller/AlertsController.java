@@ -2,6 +2,7 @@ package com.safetynet.alerts.controller;
 
 import com.safetynet.alerts.api.model.Person;
 import com.safetynet.alerts.api.response.ChildAlertResponse;
+import com.safetynet.alerts.api.response.FireResponse;
 import com.safetynet.alerts.api.response.PersonsCoveredByFirestationResponse;
 import com.safetynet.alerts.api.response.PhoneAlertResponse;
 import com.safetynet.alerts.api.validation.constraint.IsAddress;
@@ -96,6 +97,25 @@ public class AlertsController {
                 .distinct()
                 .collect(Collectors.toList());
         return PhoneAlertResponse.builder().phones(phones).build();
+    }
+
+    @Operation(
+            summary = "Returns the list of persons living at an address and the firestation covering them."
+    )
+    @JsonRequestMapping(method = RequestMethod.GET, value = "/fire")
+    @Transactional(readOnly = true)
+    public FireResponse getFire(
+            @RequestParam("address") @NotNull @IsAddress String address
+    ) {
+        ZonedDateTime now = ZonedDateTime.now();
+        FireResponse.Builder res = FireResponse.builder();
+
+        addressRepository.findByAddress(address)
+                .ifPresent(addressEntity -> res.stationNumber(addressEntity.getFirestation()));
+        for (PersonEntity personEntity : personRepository.findAllByAddressAddress(address)) {
+            res.person(personEntity.toCompletePerson(now, true));
+        }
+        return res.build();
     }
 
     public static boolean isAdult(Person person) {
