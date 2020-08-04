@@ -146,9 +146,9 @@ public class PersonController {
     @JsonRequestMapping(method = RequestMethod.DELETE)
     @Transactional
     public ResponseEntity<Void> deletePersonByNames(
-            @Parameter(description = "First name of person that needs to be updated.")
+            @Parameter(description = "First name of person that needs to be deleted.")
             @RequestParam("firstName") @NotNull @IsName String firstName,
-            @Parameter(description = "Last name of person that needs to be updated.")
+            @Parameter(description = "Last name of person that needs to be deleted.")
             @RequestParam("lastName") @NotNull @IsName String lastName
     ) {
         long count = personRepository.removeByFirstNameAndLastName(firstName, lastName);
