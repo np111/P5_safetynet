@@ -1,0 +1,12 @@
+---
+version: '3'
+services:
+  sqldb:
+    image: mysql:5.7
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: rootroot
+      MYSQL_USER: safetynet
+      MYSQL_PASSWORD: safetynet
+      MYSQL_DATABASE: safetynet

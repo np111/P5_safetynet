@@ -1,0 +1,26 @@
+---
+server:
+  port: '${SERVER_PORT:8081}'
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,trace,httptrace
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: 'update'
+    open-in-view: false
+  datasource:
+    url: 'jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:safetynet}?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC'
+    username: '${MYSQL_USERNAME:safetynet}'
+    password: '${MYSQL_PASSWORD:safetynet}'
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /docs.html
+    operationsSorter: method
