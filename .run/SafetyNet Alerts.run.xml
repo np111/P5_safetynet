@@ -1,0 +1,18 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="SafetyNet Alerts" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <module name="safetynet-alerts-server" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="com.safetynet.alerts.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.safetynet.alerts.SafetynetAlertsApplication" />
+    <option name="HIDE_BANNER" value="true" />
+    <option name="VM_PARAMETERS" value="-Dlogging.level.com.safetynet.alerts=DEBUG" />
+    <option name="ALTERNATIVE_JRE_PATH" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
