@@ -1,7 +1,9 @@
 package com.safetynet.alerts.controller;
 
 import com.safetynet.alerts.api.model.Person;
+import com.safetynet.alerts.api.response.ChildAlertResponse;
 import com.safetynet.alerts.api.response.PersonsCoveredByFirestationResponse;
+import com.safetynet.alerts.api.validation.constraint.IsAddress;
 import com.safetynet.alerts.api.validation.constraint.IsStationNumber;
 import com.safetynet.alerts.repository.AddressRepository;
 import com.safetynet.alerts.repository.PersonRepository;
@@ -50,6 +52,28 @@ public class AlertsController {
             }
         }
         return res.adultsCount(adultsCount).childrenCount(childrenCount).build();
+    }
+
+    @Operation(
+            summary = "Returns the list of persons living at an address."
+    )
+    @JsonRequestMapping(method = RequestMethod.GET, value = "/childAlert")
+    @Transactional(readOnly = true)
+    public ChildAlertResponse getChildAlert(
+            @RequestParam("address") @NotNull @IsAddress String address
+    ) {
+        ZonedDateTime now = ZonedDateTime.now();
+        ChildAlertResponse.Builder res = ChildAlertResponse.builder();
+
+        for (PersonEntity personEntity : personRepository.findAllByAddressAddress(address)) {
+            Person person = personEntity.toCompletePerson(now);
+            if (isAdult(person)) {
+                res.adult(person);
+            } else {
+                res.children(person);
+            }
+        }
+        return res.build();
     }
 
     public static boolean isAdult(Person person) {
