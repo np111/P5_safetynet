@@ -3,6 +3,7 @@ package com.safetynet.alerts.controller;
 import com.safetynet.alerts.api.model.Person;
 import com.safetynet.alerts.api.response.ChildAlertResponse;
 import com.safetynet.alerts.api.response.PersonsCoveredByFirestationResponse;
+import com.safetynet.alerts.api.response.PhoneAlertResponse;
 import com.safetynet.alerts.api.validation.constraint.IsAddress;
 import com.safetynet.alerts.api.validation.constraint.IsStationNumber;
 import com.safetynet.alerts.repository.AddressRepository;
@@ -11,6 +12,10 @@ import com.safetynet.alerts.repository.entity.PersonEntity;
 import com.safetynet.alerts.util.spring.JsonRequestMapping;
 import io.swagger.v3.oas.annotations.Operation;
 import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,6 +79,23 @@ public class AlertsController {
             }
         }
         return res.build();
+    }
+
+    @Operation(
+            summary = "Returns the list of phones of persons covered by a firestation."
+    )
+    @JsonRequestMapping(method = RequestMethod.GET, value = "/phoneAlert")
+    @Transactional(readOnly = true)
+    public PhoneAlertResponse getPhoneAlert(
+            @RequestParam("firestation") @NotNull @IsStationNumber String stationNumber
+    ) {
+        List<String> phones = StreamSupport
+                .stream(personRepository.findAllByAddressFirestation(stationNumber).spliterator(), false)
+                .map(PersonEntity::getPhone)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+        return PhoneAlertResponse.builder().phones(phones).build();
     }
 
     public static boolean isAdult(Person person) {
