@@ -32,6 +32,13 @@
   </dependencyManagement>
 
   <dependencies>
+    <!-- Our API models -->
+    <dependency>
+      <groupId>com.safetynet</groupId>
+      <artifactId>safetynet-alerts-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
     <!-- Spring Boot (w/ log4j2) -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
