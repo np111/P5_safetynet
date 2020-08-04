@@ -18,6 +18,7 @@ import com.safetynet.alerts.repository.entity.AddressEntity;
 import com.safetynet.alerts.repository.entity.PersonEntity;
 import com.safetynet.alerts.util.spring.JsonRequestMapping;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "alerts", description = "Alerts operations")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @RestController
 @RequestMapping("/")
