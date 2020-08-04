@@ -4,9 +4,11 @@ import com.safetynet.alerts.api.model.Person;
 import com.safetynet.alerts.api.response.ChildAlertResponse;
 import com.safetynet.alerts.api.response.FireResponse;
 import com.safetynet.alerts.api.response.FloodStationsResponse;
+import com.safetynet.alerts.api.response.PersonInfoResponse;
 import com.safetynet.alerts.api.response.PersonsCoveredByFirestationResponse;
 import com.safetynet.alerts.api.response.PhoneAlertResponse;
 import com.safetynet.alerts.api.validation.constraint.IsAddress;
+import com.safetynet.alerts.api.validation.constraint.IsName;
 import com.safetynet.alerts.api.validation.constraint.IsStationNumber;
 import com.safetynet.alerts.repository.AddressRepository;
 import com.safetynet.alerts.repository.PersonRepository;
@@ -142,6 +144,24 @@ public class AlertsController {
             if (!entry.getPersons().isEmpty()) {
                 res.station(entry);
             }
+        }
+        return res.build();
+    }
+
+    @Operation(
+            summary = "Returns the list of persons with a given first name and last name."
+    )
+    @JsonRequestMapping(method = RequestMethod.GET, value = "/personInfo")
+    @Transactional(readOnly = true)
+    public PersonInfoResponse getPersonInfo(
+            @RequestParam("firstName") @NotNull @IsName String firstName,
+            @RequestParam("lastName") @NotNull @IsName String lastName
+    ) {
+        ZonedDateTime now = ZonedDateTime.now();
+        PersonInfoResponse.Builder res = PersonInfoResponse.builder();
+
+        for (PersonEntity personEntity : personRepository.findAllByFirstNameAndLastName(firstName, lastName)) {
+            res.person(personEntity.toCompletePerson(now, true));
         }
         return res.build();
     }
