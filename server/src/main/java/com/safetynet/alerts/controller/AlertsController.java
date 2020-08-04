@@ -3,12 +3,14 @@ package com.safetynet.alerts.controller;
 import com.safetynet.alerts.api.model.Person;
 import com.safetynet.alerts.api.response.ChildAlertResponse;
 import com.safetynet.alerts.api.response.FireResponse;
+import com.safetynet.alerts.api.response.FloodStationsResponse;
 import com.safetynet.alerts.api.response.PersonsCoveredByFirestationResponse;
 import com.safetynet.alerts.api.response.PhoneAlertResponse;
 import com.safetynet.alerts.api.validation.constraint.IsAddress;
 import com.safetynet.alerts.api.validation.constraint.IsStationNumber;
 import com.safetynet.alerts.repository.AddressRepository;
 import com.safetynet.alerts.repository.PersonRepository;
+import com.safetynet.alerts.repository.entity.AddressEntity;
 import com.safetynet.alerts.repository.entity.PersonEntity;
 import com.safetynet.alerts.util.spring.JsonRequestMapping;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,6 +19,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,6 +117,31 @@ public class AlertsController {
                 .ifPresent(addressEntity -> res.stationNumber(addressEntity.getFirestation()));
         for (PersonEntity personEntity : personRepository.findAllByAddressAddress(address)) {
             res.person(personEntity.toCompletePerson(now, true));
+        }
+        return res.build();
+    }
+
+    @Operation(
+            summary = "Returns the list of persons covered by the given firestation (grouped by address)."
+    )
+    @JsonRequestMapping(method = RequestMethod.GET, value = "/flood/stations")
+    @Transactional(readOnly = true)
+    public FloodStationsResponse getFloodStations(
+            @RequestParam("stations") @NotEmpty List<@NotNull @IsStationNumber String> stations
+    ) {
+        ZonedDateTime now = ZonedDateTime.now();
+        FloodStationsResponse.Builder res = FloodStationsResponse.builder();
+
+        for (AddressEntity addressEntity : addressRepository.findAllByFirestationIn(stations)) {
+            FloodStationsResponse.Entry.Builder entryBuilder = FloodStationsResponse.Entry.builder()
+                    .address(addressEntity.getAddress());
+            for (PersonEntity personEntity : personRepository.findAllByAddressAddress(addressEntity.getAddress())) {
+                entryBuilder.person(personEntity.toCompletePerson(now, true));
+            }
+            FloodStationsResponse.Entry entry = entryBuilder.build();
+            if (!entry.getPersons().isEmpty()) {
+                res.station(entry);
+            }
         }
         return res.build();
     }
