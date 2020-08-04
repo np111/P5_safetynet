@@ -1,5 +1,8 @@
 package com.safetynet.alerts.repository.entity;
 
+import com.safetynet.alerts.api.model.Person;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -43,4 +46,45 @@ public class PersonEntity {
 
     @OneToOne(mappedBy = "person", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private MedicalRecordEntity medicalRecord;
+
+    public Person toPerson() {
+        AddressEntity addressEntity = getAddress();
+        return Person.builder()
+                .id(getId())
+                .firstName(getFirstName())
+                .lastName(getLastName())
+                .address(addressEntity.getAddress())
+                .city(addressEntity.getCity())
+                .zip(addressEntity.getZip())
+                .phone(getPhone())
+                .email(getEmail())
+                .build();
+    }
+
+    public Person toCompletePerson(ZonedDateTime now) {
+        return toCompletePerson(now, false);
+    }
+
+    public Person toCompletePerson(ZonedDateTime now, boolean withMedicalRecords) {
+        AddressEntity addressEntity = getAddress();
+        MedicalRecordEntity medicalRecord = getMedicalRecord();
+        Person.Builder res = Person.builder()
+                .id(getId())
+                .firstName(getFirstName())
+                .lastName(getLastName())
+                .address(addressEntity.getAddress())
+                .city(addressEntity.getCity())
+                .zip(addressEntity.getZip())
+                .phone(getPhone())
+                .email(getEmail());
+        if (medicalRecord != null) {
+            res.birthdate(medicalRecord.getBirthdate());
+            res.age(now == null ? null : medicalRecord.calculateAge(now.toLocalDate()));
+            if (withMedicalRecords) {
+                res.medications(new ArrayList<>(medicalRecord.getMedications()));
+                res.allergies(new ArrayList<>(medicalRecord.getAllergies()));
+            }
+        }
+        return res.build();
+    }
 }

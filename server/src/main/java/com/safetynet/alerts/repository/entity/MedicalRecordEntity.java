@@ -1,6 +1,9 @@
 package com.safetynet.alerts.repository.entity;
 
+import com.safetynet.alerts.api.model.MedicalRecord;
+import com.safetynet.alerts.util.DateUtil;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -17,6 +20,7 @@ import javax.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.ToString;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
@@ -57,4 +61,20 @@ public class MedicalRecordEntity {
     @Fetch(value = FetchMode.SUBSELECT)
     @OnDelete(action = OnDeleteAction.CASCADE) @JoinColumn
     private List<String> allergies;
+
+    public Integer calculateAge(@NonNull LocalDate today) {
+        return DateUtil.calculateAge(getBirthdate(), today);
+    }
+
+    public MedicalRecord toMedicalRecord() {
+        PersonEntity personEntity = getPerson();
+        return MedicalRecord.builder()
+                .personId(personEntity.getId())
+                .firstName(personEntity.getFirstName())
+                .lastName(personEntity.getLastName())
+                .birthdate(getBirthdate())
+                .medications(new ArrayList<>(getMedications()))
+                .allergies(new ArrayList<>(getAllergies()))
+                .build();
+    }
 }
