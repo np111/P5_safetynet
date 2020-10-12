@@ -139,7 +139,7 @@ public class ExceptionController {
         logger.error("Unhandled request exception:", e);
         return toResponse(ApiError.builder()
                 .type(ApiError.ErrorType.UNKNOWN)
-                .status(500)
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .code(ApiErrorCode.SERVER_EXCEPTION)
                 .message("Internal server error (" + e.getClass().getSimpleName() + ")")
                 .build());
@@ -148,7 +148,7 @@ public class ExceptionController {
     private ApiError errorBadRequest(String message) {
         return ApiError.builder()
                 .type(ApiError.ErrorType.CLIENT)
-                .status(400)
+                .status(HttpStatus.BAD_REQUEST.value())
                 .code(ApiErrorCode.BAD_REQUEST)
                 .message(message)
                 .build();
@@ -161,7 +161,7 @@ public class ExceptionController {
         }
         ApiError.Builder res = ApiError.builder()
                 .type(ApiError.ErrorType.CLIENT)
-                .status(400)
+                .status(HttpStatus.BAD_REQUEST.value())
                 .code(ApiErrorCode.VALIDATION_FAILED)
                 .message("Validation failed: " + message);
         if (parameter != null) {

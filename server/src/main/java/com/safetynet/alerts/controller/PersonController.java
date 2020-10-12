@@ -22,6 +22,7 @@ import javax.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -236,7 +237,7 @@ public class PersonController {
     private ApiException errorImmutableNames() {
         return new ApiException(ApiError.builder()
                 .type(ApiError.ErrorType.CLIENT)
-                .status(401)
+                .status(HttpStatus.BAD_REQUEST.value())
                 .code(ApiErrorCode.BAD_REQUEST)
                 .message("firstName and lastName cannot be updated in this context, use ID instead")
                 .build());
@@ -248,7 +249,7 @@ public class PersonController {
     private ApiException errorPersonExists() {
         return new ApiException(ApiError.builder()
                 .type(ApiError.ErrorType.SERVICE)
-                .status(409)
+                .status(HttpStatus.CONFLICT.value())
                 .code(ApiErrorCode.ALREADY_EXISTS)
                 .message("A person with a similar names combination already exists")
                 .build());
@@ -260,7 +261,7 @@ public class PersonController {
     private ApiException errorPersonNotFound() {
         return new ApiException(ApiError.builder()
                 .type(ApiError.ErrorType.SERVICE)
-                .status(404)
+                .status(HttpStatus.NOT_FOUND.value())
                 .code(ApiErrorCode.NOT_FOUND)
                 .message("Person not found")
                 .build());
@@ -273,7 +274,7 @@ public class PersonController {
     private ApiException errorInterferingNames() {
         return new ApiException(ApiError.builder()
                 .type(ApiError.ErrorType.SERVICE)
-                .status(409)
+                .status(HttpStatus.CONFLICT.value())
                 .code(ApiErrorCode.INTERFERING_NAMES)
                 .message("Multiple persons share this names combination, use ID instead")
                 .build());
@@ -286,7 +287,7 @@ public class PersonController {
     private ApiException errorInterferingAddress() {
         return new ApiException(ApiError.builder()
                 .type(ApiError.ErrorType.SERVICE)
-                .status(409)
+                .status(HttpStatus.CONFLICT.value())
                 .code(ApiErrorCode.INTERFERING_ADDRESS)
                 .message("A matching address already exists with a different city/zip combination")
                 .build());

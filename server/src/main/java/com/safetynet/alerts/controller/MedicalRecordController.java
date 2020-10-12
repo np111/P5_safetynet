@@ -21,6 +21,7 @@ import javax.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -235,7 +236,7 @@ public class MedicalRecordController {
     private ApiException errorMedicalRecordExists() {
         return new ApiException(ApiError.builder()
                 .type(ApiError.ErrorType.SERVICE)
-                .status(409)
+                .status(HttpStatus.CONFLICT.value())
                 .code(ApiErrorCode.ALREADY_EXISTS)
                 .message("A medical record already exists for this person")
                 .build());
@@ -247,7 +248,7 @@ public class MedicalRecordController {
     private ApiException errorMedicalRecordNotFound() {
         return new ApiException(ApiError.builder()
                 .type(ApiError.ErrorType.SERVICE)
-                .status(404)
+                .status(HttpStatus.NOT_FOUND.value())
                 .code(ApiErrorCode.NOT_FOUND)
                 .message("Medical record not found")
                 .build());
@@ -259,7 +260,7 @@ public class MedicalRecordController {
     private ApiException errorPersonNotFound() {
         return new ApiException(ApiError.builder()
                 .type(ApiError.ErrorType.SERVICE)
-                .status(404)
+                .status(HttpStatus.NOT_FOUND.value())
                 .code(ApiErrorCode.NOT_FOUND)
                 .message("The person linked to this medical file cannot be found")
                 .build());
@@ -272,7 +273,7 @@ public class MedicalRecordController {
     private ApiException errorInterferingNames() {
         return new ApiException(ApiError.builder()
                 .type(ApiError.ErrorType.SERVICE)
-                .status(409)
+                .status(HttpStatus.CONFLICT.value())
                 .code(ApiErrorCode.INTERFERING_NAMES)
                 .message("Multiple medical records share this names combination, use ID instead")
                 .build());

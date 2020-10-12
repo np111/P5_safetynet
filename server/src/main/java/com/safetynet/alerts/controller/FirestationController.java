@@ -21,6 +21,7 @@ import javax.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -150,7 +151,7 @@ public class FirestationController {
     private ApiException errorImmutableAddress() {
         return new ApiException(ApiError.builder()
                 .type(ApiError.ErrorType.CLIENT)
-                .status(401)
+                .status(HttpStatus.BAD_REQUEST.value())
                 .code(ApiErrorCode.BAD_REQUEST)
                 .message("address cannot be updated")
                 .build());
@@ -162,7 +163,7 @@ public class FirestationController {
     private ApiException errorFirestationNotFound() {
         return new ApiException(ApiError.builder()
                 .type(ApiError.ErrorType.SERVICE)
-                .status(404)
+                .status(HttpStatus.NOT_FOUND.value())
                 .code(ApiErrorCode.NOT_FOUND)
                 .message("address not found")
                 .build());
