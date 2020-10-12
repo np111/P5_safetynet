@@ -24,3 +24,8 @@ springdoc:
   swagger-ui:
     path: /docs.html
     operationsSorter: method
+
+safetynet:
+  http-logging:
+    enabled: '${HTTP_LOGGING:false}'
+    includePayload: '${HTTP_LOGGING_PAYLOAD:true}'
