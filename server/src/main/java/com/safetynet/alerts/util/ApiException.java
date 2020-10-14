@@ -1,7 +1,7 @@
 package com.safetynet.alerts.util;
 
 import com.safetynet.alerts.api.model.ApiError;
-import com.safetynet.alerts.controller.ExceptionController;
+import com.safetynet.alerts.http.controller.ExceptionController;
 import javax.servlet.http.HttpServletRequest;
 import lombok.Getter;
 

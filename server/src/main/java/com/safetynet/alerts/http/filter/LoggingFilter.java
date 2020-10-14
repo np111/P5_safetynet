@@ -1,4 +1,4 @@
-package com.safetynet.alerts.filter;
+package com.safetynet.alerts.http.filter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
