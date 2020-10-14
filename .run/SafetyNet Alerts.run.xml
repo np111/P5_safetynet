@@ -11,6 +11,9 @@
     <option name="HIDE_BANNER" value="true" />
     <option name="VM_PARAMETERS" value="-Dlogging.level.com.safetynet.alerts=DEBUG" />
     <option name="ALTERNATIVE_JRE_PATH" />
+    <envs>
+      <env name="HTTP_LOGGING" value="true" />
+    </envs>
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

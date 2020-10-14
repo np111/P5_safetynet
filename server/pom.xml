@@ -16,6 +16,7 @@
     <!-- Dependencies versions -->
     <spring-boot.version>2.3.2.RELEASE</spring-boot.version>
     <springdoc-openapi.version>1.4.3</springdoc-openapi.version>
+    <commons-io.version>2.5</commons-io.version>
   </properties>
 
   <dependencyManagement>
@@ -53,6 +54,13 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-log4j2</artifactId>
+    </dependency>
+
+    <!-- Spring Boot: Configuration annotations processor -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-configuration-processor</artifactId>
+      <optional>true</optional>
     </dependency>
 
     <!-- Spring Boot: Web (w/ Jetty) -->
@@ -105,6 +113,13 @@
       <groupId>org.springdoc</groupId>
       <artifactId>springdoc-openapi-ui</artifactId>
       <version>${springdoc-openapi.version}</version>
+    </dependency>
+
+    <!-- Utils -->
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>${commons-io.version}</version>
     </dependency>
 
     <!-- Tests -->
