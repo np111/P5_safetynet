@@ -12,7 +12,7 @@ import com.safetynet.alerts.repository.AddressRepository;
 import com.safetynet.alerts.repository.PersonRepository;
 import com.safetynet.alerts.repository.entity.AddressEntity;
 import com.safetynet.alerts.repository.entity.PersonEntity;
-import com.safetynet.alerts.repository.mappers.PersonMapper;
+import com.safetynet.alerts.repository.mapper.PersonMapper;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;

@@ -1,4 +1,4 @@
-package com.safetynet.alerts.repository.mappers;
+package com.safetynet.alerts.repository.mapper;
 
 import com.safetynet.alerts.api.model.Firestation;
 import com.safetynet.alerts.repository.entity.AddressEntity;

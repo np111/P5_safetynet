@@ -3,7 +3,7 @@ package com.safetynet.alerts.service;
 import com.safetynet.alerts.api.model.Firestation;
 import com.safetynet.alerts.repository.AddressRepository;
 import com.safetynet.alerts.repository.entity.AddressEntity;
-import com.safetynet.alerts.repository.mappers.AddressMapper;
+import com.safetynet.alerts.repository.mapper.AddressMapper;
 import com.safetynet.alerts.util.exception.FastException;
 import java.util.Objects;
 import lombok.Getter;

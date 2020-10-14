@@ -5,7 +5,7 @@ import com.safetynet.alerts.repository.AddressRepository;
 import com.safetynet.alerts.repository.PersonRepository;
 import com.safetynet.alerts.repository.entity.AddressEntity;
 import com.safetynet.alerts.repository.entity.PersonEntity;
-import com.safetynet.alerts.repository.mappers.PersonMapper;
+import com.safetynet.alerts.repository.mapper.PersonMapper;
 import com.safetynet.alerts.util.exception.FastException;
 import java.util.Objects;
 import lombok.Getter;

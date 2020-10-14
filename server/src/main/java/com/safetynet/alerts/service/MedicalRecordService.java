@@ -5,7 +5,7 @@ import com.safetynet.alerts.repository.MedicalRecordRepository;
 import com.safetynet.alerts.repository.PersonRepository;
 import com.safetynet.alerts.repository.entity.MedicalRecordEntity;
 import com.safetynet.alerts.repository.entity.PersonEntity;
-import com.safetynet.alerts.repository.mappers.MedicalRecordMapper;
+import com.safetynet.alerts.repository.mapper.MedicalRecordMapper;
 import com.safetynet.alerts.util.exception.FastException;
 import lombok.Getter;
 import lombok.NonNull;
