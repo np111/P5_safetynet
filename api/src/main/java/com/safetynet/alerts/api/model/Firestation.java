@@ -4,6 +4,7 @@ import com.safetynet.alerts.api.validation.constraint.IsAddress;
 import com.safetynet.alerts.api.validation.constraint.IsStationNumber;
 import com.safetynet.alerts.api.validation.group.Update;
 import javax.validation.constraints.NotNull;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +16,7 @@ import lombok.SneakyThrows;
  */
 @Builder(builderClassName = "Builder")
 @NoArgsConstructor
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Data
 public class Firestation implements Cloneable {
     @NotNull(groups = Update.class)
