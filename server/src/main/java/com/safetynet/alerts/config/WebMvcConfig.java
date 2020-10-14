@@ -48,6 +48,7 @@ public class WebMvcConfig implements WebMvcConfigurer, BeanPostProcessor {
         return props;
     }
 
+    @SuppressWarnings("deprecation") // no alternatives yet
     @Override
     public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
         // default to application/json content-type
@@ -61,6 +62,7 @@ public class WebMvcConfig implements WebMvcConfigurer, BeanPostProcessor {
         configurer.ignoreUnknownPathExtensions(true);
     }
 
+    @SuppressWarnings("deprecation") // no alternatives yet
     @Override
     public void configurePathMatch(PathMatchConfigurer configurer) {
         // don't use path extensions for content negotiation (see favorPathExtension/ignoreUnknownPathExtensions above)
