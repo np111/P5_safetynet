@@ -3,6 +3,7 @@ package com.safetynet.alerts.api.response;
 import com.safetynet.alerts.api.model.Person;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +15,7 @@ import lombok.SneakyThrows;
  */
 @lombok.Builder(builderClassName = "Builder")
 @NoArgsConstructor
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Data
 public class PersonInfoResponse {
     @Singular("person")

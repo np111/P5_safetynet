@@ -13,6 +13,7 @@ import com.safetynet.alerts.api.validation.group.Update;
 import java.time.LocalDate;
 import java.util.List;
 import javax.validation.constraints.NotNull;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,7 +25,7 @@ import lombok.SneakyThrows;
  */
 @Builder(builderClassName = "Builder")
 @NoArgsConstructor
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Data
 public class Person implements Cloneable {
     /**

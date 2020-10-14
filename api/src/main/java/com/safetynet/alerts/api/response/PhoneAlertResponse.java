@@ -3,6 +3,7 @@ package com.safetynet.alerts.api.response;
 import com.safetynet.alerts.api.model.Person;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +15,7 @@ import lombok.SneakyThrows;
  */
 @Builder(builderClassName = "Builder")
 @NoArgsConstructor
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Data
 public class PhoneAlertResponse implements Cloneable {
     private List<String> phones;
