@@ -65,16 +65,4 @@ public class MedicalRecordEntity {
     public Integer calculateAge(@NonNull LocalDate today) {
         return DateUtil.calculateAge(getBirthdate(), today);
     }
-
-    public MedicalRecord toMedicalRecord() {
-        PersonEntity personEntity = getPerson();
-        return MedicalRecord.builder()
-                .personId(personEntity.getId())
-                .firstName(personEntity.getFirstName())
-                .lastName(personEntity.getLastName())
-                .birthdate(getBirthdate())
-                .medications(new ArrayList<>(getMedications()))
-                .allergies(new ArrayList<>(getAllergies()))
-                .build();
-    }
 }

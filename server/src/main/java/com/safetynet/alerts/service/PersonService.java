@@ -5,6 +5,7 @@ import com.safetynet.alerts.repository.AddressRepository;
 import com.safetynet.alerts.repository.PersonRepository;
 import com.safetynet.alerts.repository.entity.AddressEntity;
 import com.safetynet.alerts.repository.entity.PersonEntity;
+import com.safetynet.alerts.repository.mappers.PersonMapper;
 import com.safetynet.alerts.util.exception.FastException;
 import java.util.Objects;
 import lombok.Getter;
@@ -30,8 +31,7 @@ public class PersonService {
      */
     @Transactional
     public Person getPerson(long id) {
-        PersonEntity personEntity = personRepository.findById(id).orElse(null);
-        return personEntity == null ? null : personEntity.toPerson();
+        return PersonMapper.getInstance().toPerson(personRepository.findById(id).orElse(null));
     }
 
     /**
@@ -200,7 +200,7 @@ public class PersonService {
         private final @NonNull PersonEntity personEntity;
 
         public @NonNull Person getPerson() {
-            return personEntity.toPerson();
+            return PersonMapper.getInstance().toPerson(personEntity);
         }
     }
 

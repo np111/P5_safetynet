@@ -3,6 +3,7 @@ package com.safetynet.alerts.service;
 import com.safetynet.alerts.api.model.Firestation;
 import com.safetynet.alerts.repository.AddressRepository;
 import com.safetynet.alerts.repository.entity.AddressEntity;
+import com.safetynet.alerts.repository.mappers.AddressMapper;
 import com.safetynet.alerts.util.exception.FastException;
 import java.util.Objects;
 import lombok.Getter;
@@ -27,8 +28,7 @@ public class FirestationService {
      */
     @Transactional
     public Firestation getFirestation(String address) {
-        AddressEntity addressEntity = addressRepository.findByAddress(address).orElse(null);
-        return addressEntity == null || addressEntity.getFirestation() == null ? null : addressEntity.toFirestation();
+        return AddressMapper.getInstance().toFirestation(addressRepository.findByAddress(address).orElse(null));
     }
 
     /**
@@ -109,7 +109,7 @@ public class FirestationService {
         private final @NonNull AddressEntity addressEntity;
 
         public @NonNull Firestation getFirestation() {
-            return addressEntity.toFirestation();
+            return AddressMapper.getInstance().toFirestation(addressEntity);
         }
     }
 

@@ -12,6 +12,7 @@ import com.safetynet.alerts.repository.AddressRepository;
 import com.safetynet.alerts.repository.PersonRepository;
 import com.safetynet.alerts.repository.entity.AddressEntity;
 import com.safetynet.alerts.repository.entity.PersonEntity;
+import com.safetynet.alerts.repository.mappers.PersonMapper;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -38,7 +39,7 @@ public class AlertsService {
         int childrenCount = 0;
 
         for (PersonEntity personEntity : personRepository.findAllByAddressFirestation(stationNumber)) {
-            Person person = personEntity.toCompletePerson(now);
+            Person person = PersonMapper.getInstance().toCompletePerson(personEntity, now);
             res.person(person);
             if (isAdult(person)) {
                 ++adultsCount;
@@ -55,7 +56,7 @@ public class AlertsService {
         ChildAlertResponse.Builder res = ChildAlertResponse.builder();
 
         for (PersonEntity personEntity : personRepository.findAllByAddressAddress(address)) {
-            Person person = personEntity.toCompletePerson(now);
+            Person person = PersonMapper.getInstance().toCompletePerson(personEntity, now);
             if (isAdult(person)) {
                 res.adult(person);
             } else {
@@ -84,7 +85,7 @@ public class AlertsService {
         addressRepository.findByAddress(address)
                 .ifPresent(addressEntity -> res.stationNumber(addressEntity.getFirestation()));
         for (PersonEntity personEntity : personRepository.findAllByAddressAddress(address)) {
-            res.person(personEntity.toCompletePerson(now, true));
+            res.person(PersonMapper.getInstance().toCompletePerson(personEntity, now, true));
         }
         return res.build();
     }
@@ -98,7 +99,7 @@ public class AlertsService {
             FloodStationsResponse.Entry.Builder entryBuilder = FloodStationsResponse.Entry.builder()
                     .address(addressEntity.getAddress());
             for (PersonEntity personEntity : personRepository.findAllByAddressAddress(addressEntity.getAddress())) {
-                entryBuilder.person(personEntity.toCompletePerson(now, true));
+                entryBuilder.person(PersonMapper.getInstance().toCompletePerson(personEntity, now, true));
             }
             FloodStationsResponse.Entry entry = entryBuilder.build();
             if (!entry.getPersons().isEmpty()) {
@@ -114,7 +115,7 @@ public class AlertsService {
         PersonInfoResponse.Builder res = PersonInfoResponse.builder();
 
         for (PersonEntity personEntity : personRepository.findAllByFirstNameAndLastName(firstName, lastName)) {
-            res.person(personEntity.toCompletePerson(now, true));
+            res.person(PersonMapper.getInstance().toCompletePerson(personEntity, now, true));
         }
         return res.build();
     }

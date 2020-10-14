@@ -5,6 +5,7 @@ import com.safetynet.alerts.repository.MedicalRecordRepository;
 import com.safetynet.alerts.repository.PersonRepository;
 import com.safetynet.alerts.repository.entity.MedicalRecordEntity;
 import com.safetynet.alerts.repository.entity.PersonEntity;
+import com.safetynet.alerts.repository.mappers.MedicalRecordMapper;
 import com.safetynet.alerts.util.exception.FastException;
 import lombok.Getter;
 import lombok.NonNull;
@@ -29,8 +30,7 @@ public class MedicalRecordService {
      */
     @Transactional
     public MedicalRecord getMedicalRecord(long id) {
-        MedicalRecordEntity medicalRecordEntity = medicalRecordRepository.findById(id).orElse(null);
-        return medicalRecordEntity == null ? null : medicalRecordEntity.toMedicalRecord();
+        return MedicalRecordMapper.getInstance().toMedicalRecord(medicalRecordRepository.findById(id).orElse(null));
     }
 
     /**
@@ -189,7 +189,7 @@ public class MedicalRecordService {
         private final @NonNull MedicalRecordEntity medicalRecordEntity;
 
         public @NonNull MedicalRecord getMedicalRecord() {
-            return medicalRecordEntity.toMedicalRecord();
+            return MedicalRecordMapper.getInstance().toMedicalRecord(medicalRecordEntity);
         }
     }
 

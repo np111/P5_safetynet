@@ -1,6 +1,5 @@
 package com.safetynet.alerts.repository.entity;
 
-import com.safetynet.alerts.api.model.Firestation;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -38,12 +37,5 @@ public class AddressEntity {
 
     public boolean isComplete() {
         return getCity() != null && getZip() != null;
-    }
-
-    public Firestation toFirestation() {
-        return Firestation.builder()
-                .address(getAddress())
-                .station(getFirestation())
-                .build();
     }
 }
