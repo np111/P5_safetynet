@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.safetynet.alerts.api.model.Firestation;
 import com.safetynet.alerts.api.model.MedicalRecord;
 import com.safetynet.alerts.api.model.Person;
+import com.safetynet.alerts.properties.JsonSeedProperties;
 import com.safetynet.alerts.repository.AddressRepository;
 import com.safetynet.alerts.repository.PersonRepository;
 import com.safetynet.alerts.repository.entity.AddressEntity;
@@ -19,7 +20,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * A service that initializes repositories from the data.json file.
  */
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Service
 @Scope("singleton")
 public class JsonSeedService {
@@ -41,11 +40,21 @@ public class JsonSeedService {
     private final AddressRepository addressRepository;
     private final PersonRepository personRepository;
     private final ObjectMapper objectMapper;
+    private final boolean enabled;
+
+    @Autowired
+    public JsonSeedService(AddressRepository addressRepository, PersonRepository personRepository,
+            ObjectMapper objectMapper, JsonSeedProperties props) {
+        this.addressRepository = addressRepository;
+        this.personRepository = personRepository;
+        this.objectMapper = objectMapper;
+        this.enabled = props.isEnabled();
+    }
 
     @EventListener(ContextRefreshedEvent.class)
     @Transactional
     public void onContextRefreshed() {
-        if (isDatabaseEmpty()) {
+        if (enabled && isDatabaseEmpty()) {
             // Only seed the database at the first usage
             logger.debug("Seeding database with data.json");
             Models models = readSeedDataFromResource(objectMapper, "/data.json");
