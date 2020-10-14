@@ -5,10 +5,7 @@ import com.safetynet.alerts.api.model.MedicalRecord;
 import com.safetynet.alerts.api.validation.constraint.IsName;
 import com.safetynet.alerts.api.validation.group.Create;
 import com.safetynet.alerts.api.validation.group.Update;
-import com.safetynet.alerts.repository.MedicalRecordRepository;
-import com.safetynet.alerts.repository.PersonRepository;
-import com.safetynet.alerts.repository.entity.MedicalRecordEntity;
-import com.safetynet.alerts.repository.entity.PersonEntity;
+import com.safetynet.alerts.service.MedicalRecordService;
 import com.safetynet.alerts.util.ApiErrorCode;
 import com.safetynet.alerts.util.ApiException;
 import com.safetynet.alerts.util.spring.JsonRequestMapping;
@@ -23,7 +20,6 @@ import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,8 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/medicalRecord")
 @Validated
 public class MedicalRecordController {
-    private final MedicalRecordRepository medicalRecordRepository;
-    private final PersonRepository personRepository;
+    private final MedicalRecordService medicalRecordService;
 
     @Operation(
             summary = "Find medical record by ID."
@@ -47,16 +42,15 @@ public class MedicalRecordController {
     )
     // TODO: Add errors documentation
     @JsonRequestMapping(method = RequestMethod.GET, value = "/{personId}")
-    @Transactional
     public MedicalRecord getMedicalRecord(
             @Parameter(description = "ID of medical record to return.")
             @PathVariable("personId") @NotNull Long id
     ) {
-        MedicalRecordEntity medicalRecordEntity = medicalRecordRepository.findById(id).orElse(null);
-        if (medicalRecordEntity == null) {
+        MedicalRecord res = medicalRecordService.getMedicalRecord(id);
+        if (res == null) {
             throw errorMedicalRecordNotFound();
         }
-        return medicalRecordEntity.toMedicalRecord();
+        return res;
     }
 
     @Operation(
@@ -64,13 +58,11 @@ public class MedicalRecordController {
     )
     // TODO: Add errors documentation
     @JsonRequestMapping(method = RequestMethod.POST)
-    @Transactional
     public ResponseEntity<Void> createMedicalRecord(
             @Parameter(description = "Medical record object that needs to be added.")
             @RequestBody @Validated({Default.class, Create.class}) MedicalRecord body
     ) {
-        body.setPersonId(null);
-        return update(null, body);
+        return toResponse(() -> medicalRecordService.createMedicalRecord(body));
     }
 
     @Operation(
@@ -78,19 +70,13 @@ public class MedicalRecordController {
     )
     // TODO: Add errors documentation
     @JsonRequestMapping(method = RequestMethod.PUT, value = "/{personId}")
-    @Transactional
     public ResponseEntity<Void> updateMedicalRecord(
             @Parameter(description = "ID of medical record that needs to be updated.")
             @PathVariable("personId") @NotNull Long id,
             @Parameter(description = "New medical record object.")
             @RequestBody @Validated({Default.class, Update.class}) MedicalRecord body
     ) {
-        body.setPersonId(id);
-        MedicalRecordEntity medicalRecordEntity = medicalRecordRepository.findById(id).orElse(null);
-        if (medicalRecordEntity == null) {
-            throw errorMedicalRecordNotFound();
-        }
-        return update(medicalRecordEntity, body);
+        return toResponse(() -> medicalRecordService.updateMedicalRecord(id, body));
     }
 
     @Operation(
@@ -98,7 +84,6 @@ public class MedicalRecordController {
     )
     // TODO: Add errors documentation
     @JsonRequestMapping(method = RequestMethod.PUT)
-    @Transactional
     public ResponseEntity<Void> updateMedicalRecordByNames(
             @Parameter(description = "First name of person whose medical record needs to be updated.")
             @RequestParam("firstName") @NotNull @IsName String firstName,
@@ -107,18 +92,7 @@ public class MedicalRecordController {
             @Parameter(description = "New medical record object.")
             @RequestBody @Validated({Default.class, Update.class}) MedicalRecord body
     ) {
-        ResponseEntity<Void> res = null;
-        for (MedicalRecordEntity medicalRecordEntity : medicalRecordRepository
-                .findAllByPersonFirstNameAndPersonLastName(firstName, lastName)) {
-            if (res != null) {
-                throw errorInterferingNames();
-            }
-            res = update(medicalRecordEntity, body);
-        }
-        if (res == null) {
-            throw errorMedicalRecordNotFound();
-        }
-        return res;
+        return toResponse(() -> medicalRecordService.updateMedicalRecordByNames(firstName, lastName, body));
     }
 
     @Operation(
@@ -126,12 +100,11 @@ public class MedicalRecordController {
     )
     // TODO: Add errors documentation
     @JsonRequestMapping(method = RequestMethod.DELETE, value = "/{personId}")
-    @Transactional
     public ResponseEntity<Void> deleteMedicalRecord(
             @Parameter(description = "ID of medical record that needs to be deleted.")
             @PathVariable("personId") @NotNull Long id
     ) {
-        if (medicalRecordRepository.removeById(id) == 0) {
+        if (!medicalRecordService.deleteMedicalRecord(id)) {
             throw errorMedicalRecordNotFound();
         }
         return ResponseEntity.noContent().build();
@@ -142,92 +115,57 @@ public class MedicalRecordController {
     )
     // TODO: Add errors documentation
     @JsonRequestMapping(method = RequestMethod.DELETE)
-    @Transactional
     public ResponseEntity<Void> deleteMedicalRecordByNames(
             @Parameter(description = "First name of person whose medical record needs to be deleted.")
             @RequestParam("firstName") @NotNull @IsName String firstName,
             @Parameter(description = "Last name of person whose medical record needs to be deleted.")
             @RequestParam("lastName") @NotNull @IsName String lastName
     ) {
-        long count = medicalRecordRepository.removeByPersonFirstNameAndPersonLastName(firstName, lastName);
-        if (count == 0) {
-            throw errorMedicalRecordNotFound();
-        }
-        if (count > 1) {
+        try {
+            if (!medicalRecordService.deleteMedicalRecordByNames(firstName, lastName)) {
+                throw errorMedicalRecordNotFound();
+            }
+            return ResponseEntity.noContent().build();
+        } catch (MedicalRecordService.InterferingNamesException e) {
             throw errorInterferingNames();
         }
-        return ResponseEntity.noContent().build();
     }
 
-    /**
-     * Create or update the medical record entity from it's model.
-     *
-     * @param entity the existing entity; or {@code null} to create one
-     * @param body   the medical record model to apply
-     * @return the REST response
-     */
-    private ResponseEntity<Void> update(MedicalRecordEntity entity, MedicalRecord body) {
-        boolean create = (entity == null);
-
-        // create or update the medical record
-        if (create) {
-            entity = new MedicalRecordEntity();
-            PersonEntity personEntity = findPerson(body);
-            entity.setPerson(personEntity);
-            if (medicalRecordRepository.existsByPersonId(personEntity.getId())) {
-                throw errorMedicalRecordExists();
-            }
-        }
-        entity.setBirthdate(body.getBirthdate());
-        entity.setMedications(body.getMedications());
-        entity.setAllergies(body.getAllergies());
-        medicalRecordRepository.save(entity);
-
-        // returns rest response
-        if (create) {
-            return ResponseEntity.created(getLocation(entity)).build();
-        } else {
-            return ResponseEntity.noContent().location(getLocation(entity)).build();
-        }
-    }
-
-    /**
-     * Find the person entity targeted by a medical record.
-     *
-     * @throws ApiException {@link #errorInterferingNames()}, {@link #errorPersonNotFound()}
-     */
-    private PersonEntity findPerson(MedicalRecord body) {
-        PersonEntity personEntity = null;
-        if (body.getPersonId() != null) {
-            // find person by ID
-            personEntity = personRepository.findById(body.getPersonId()).orElse(null);
-        } else if (body.getFirstName() != null && body.getLastName() != null) {
-            // find person by fist and last name
-            // but fail if multiple persons share the same fist and last name combination
-            for (PersonEntity e : personRepository
-                    .findAllByFirstNameAndLastName(body.getFirstName(), body.getLastName())) {
-                if (personEntity != null) {
-                    throw errorInterferingNames();
-                }
-                personEntity = e;
-            }
-        }
-
-        if (personEntity == null) {
-            // fail if nobody was found
+    private ResponseEntity<Void> toResponse(UpdateFunction fct) {
+        MedicalRecordService.UpdateResult res;
+        try {
+            res = fct.call();
+        } catch (MedicalRecordService.InterferingNamesException e) {
+            throw errorInterferingNames();
+        } catch (MedicalRecordService.PersonNotFoundException e) {
             throw errorPersonNotFound();
+        } catch (MedicalRecordService.MedicalRecordExistsException e) {
+            throw errorMedicalRecordExists();
         }
+        if (res == null) {
+            throw errorMedicalRecordNotFound();
+        }
+        if (res.isCreated()) {
+            return ResponseEntity.created(getLocation(res.getMedicalRecord())).build();
+        } else {
+            return ResponseEntity.noContent().location(getLocation(res.getMedicalRecord())).build();
+        }
+    }
 
-        return personEntity;
+    private interface UpdateFunction {
+        MedicalRecordService.UpdateResult call() throws
+                MedicalRecordService.InterferingNamesException,
+                MedicalRecordService.PersonNotFoundException,
+                MedicalRecordService.MedicalRecordExistsException;
     }
 
     /**
      * Returns the URL to a medical record.
      */
     @SneakyThrows
-    private URI getLocation(MedicalRecordEntity medicalRecordEntity) {
+    private URI getLocation(MedicalRecord medicalRecord) {
         // TODO: Returns full URI instead of relative
-        return new URI("/medicalRecord/" + medicalRecordEntity.getId());
+        return new URI("/medicalRecord/" + medicalRecord.getPersonId());
     }
 
     /**
