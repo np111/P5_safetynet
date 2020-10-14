@@ -19,27 +19,54 @@ import org.springframework.transaction.annotation.Transactional;
 public class FirestationService {
     private final AddressRepository addressRepository;
 
+    /**
+     * Returns a {@linkplain Firestation firestation} by it's address.
+     *
+     * @param address Address of the firestation to return
+     * @return the firestation; or {@code null} if none has the given address
+     */
     @Transactional
     public Firestation getFirestation(String address) {
         AddressEntity addressEntity = addressRepository.findByAddress(address).orElse(null);
-        if (addressEntity == null || addressEntity.getFirestation() == null) {
-            return null;
-        }
-        return addressEntity.toFirestation();
+        return addressEntity == null || addressEntity.getFirestation() == null ? null : addressEntity.toFirestation();
     }
 
+    /**
+     * Create a new {@linkplain Firestation firestation}.
+     *
+     * @param body data
+     * @return the created firestation
+     */
     @Transactional
-    public UpdateResult createFirestation(Firestation body) throws ImmutableAddressException {
+    public UpdateResult createFirestation(Firestation body) {
         AddressEntity addressEntity = addressRepository.findByAddress(body.getAddress()).orElse(null);
-        return update(addressEntity, body);
+        try {
+            return update(addressEntity, body);
+        } catch (ImmutableAddressException e) {
+            throw new RuntimeException("unreachable", e);
+        }
     }
 
+    /**
+     * Create or update a {@linkplain Firestation firestation}.
+     *
+     * @param address Address of the firestation to update
+     * @param body    data
+     * @return the created or updated firestation
+     * @throws ImmutableAddressException if you try to update address
+     */
     @Transactional
     public UpdateResult updateFirestation(String address, Firestation body) throws ImmutableAddressException {
         AddressEntity addressEntity = addressRepository.findByAddress(address).orElse(null);
         return update(addressEntity, body);
     }
 
+    /**
+     * Delete a {@linkplain Firestation firestation} by it's address.
+     *
+     * @param address Address of the firestation to delete
+     * @return {@code true} if the firestation existed and was deleted; or {@code false} if not
+     */
     @Transactional
     public boolean deleteFirestation(String address) {
         AddressEntity addressEntity = addressRepository.findByAddress(address).orElse(null);
@@ -72,6 +99,7 @@ public class FirestationService {
         entity.setFirestation(body.getStation());
         addressRepository.save(entity);
 
+        // returns result
         return new UpdateResult(create, entity);
     }
 

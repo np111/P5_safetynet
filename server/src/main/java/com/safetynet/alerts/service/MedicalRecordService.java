@@ -21,12 +21,27 @@ public class MedicalRecordService {
     private final MedicalRecordRepository medicalRecordRepository;
     private final PersonRepository personRepository;
 
+    /**
+     * Returns a {@linkplain MedicalRecord medical record} by it's ID.
+     *
+     * @param id ID of the medical record to return
+     * @return the medical record; or {@code null} if none has the given ID
+     */
     @Transactional
     public MedicalRecord getMedicalRecord(long id) {
         MedicalRecordEntity medicalRecordEntity = medicalRecordRepository.findById(id).orElse(null);
         return medicalRecordEntity == null ? null : medicalRecordEntity.toMedicalRecord();
     }
 
+    /**
+     * Create a new {@linkplain MedicalRecord medical record}.
+     *
+     * @param body data (personId is ignored)
+     * @return the created medical record
+     * @throws InterferingNamesException    if more than one person matches this medical record
+     * @throws PersonNotFoundException      if no person matches this medical record
+     * @throws MedicalRecordExistsException if a medical record already exists for this person
+     */
     @Transactional
     public UpdateResult createMedicalRecord(MedicalRecord body)
             throws InterferingNamesException, PersonNotFoundException, MedicalRecordExistsException {
@@ -34,6 +49,16 @@ public class MedicalRecordService {
         return update(null, body);
     }
 
+    /**
+     * Update an existing {@linkplain MedicalRecord medical record}.
+     *
+     * @param id   ID of the medical record to update
+     * @param body data (personId is ignored)
+     * @return the updated medical record
+     * @throws InterferingNamesException    if more than one person matches this medical record
+     * @throws PersonNotFoundException      if no person matches this medical record
+     * @throws MedicalRecordExistsException if a medical record already exists for this person
+     */
     @Transactional
     public UpdateResult updateMedicalRecord(long id, MedicalRecord body)
             throws InterferingNamesException, PersonNotFoundException, MedicalRecordExistsException {
@@ -45,6 +70,17 @@ public class MedicalRecordService {
         return update(medicalRecordEntity, body);
     }
 
+    /**
+     * Update an existing {@linkplain MedicalRecord medical record} by it's person names.
+     *
+     * @param firstName First name of the person to update
+     * @param lastName  Last name of the person to update
+     * @param body      data (personId is ignored)
+     * @return the updated medical record; or {@code null} if none has the given names
+     * @throws InterferingNamesException    if more than one person matches this medical record
+     * @throws PersonNotFoundException      if no person matches this medical record
+     * @throws MedicalRecordExistsException if a medical record already exists for this person
+     */
     @Transactional
     public UpdateResult updateMedicalRecordByNames(String firstName, String lastName, MedicalRecord body)
             throws InterferingNamesException, MedicalRecordExistsException, PersonNotFoundException {
@@ -59,11 +95,25 @@ public class MedicalRecordService {
         return res;
     }
 
+    /**
+     * Delete a {@linkplain MedicalRecord medical record} by it's ID.
+     *
+     * @param id ID of the medical record to delete
+     * @return {@code true} if the medical record existed and was deleted; or {@code false} if not
+     */
     @Transactional
     public boolean deleteMedicalRecord(long id) {
         return medicalRecordRepository.removeById(id) != 0;
     }
 
+    /**
+     * Delete a {@linkplain MedicalRecord medical record} by it's person names.
+     *
+     * @param firstName First name of the person to delete
+     * @param lastName  Last name of the person to delete
+     * @return {@code true} if the medical record existed and was deleted; or {@code false} if not
+     * @throws InterferingNamesException if more than one person has this names combination
+     */
     @Transactional
     public boolean deleteMedicalRecordByNames(String firstName, String lastName) throws InterferingNamesException {
         long count = medicalRecordRepository.removeByPersonFirstNameAndPersonLastName(firstName, lastName);
@@ -132,7 +182,6 @@ public class MedicalRecordService {
 
         return personEntity;
     }
-
 
     @RequiredArgsConstructor
     public static class UpdateResult {

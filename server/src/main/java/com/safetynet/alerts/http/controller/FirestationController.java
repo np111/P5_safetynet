@@ -62,12 +62,8 @@ public class FirestationController {
             @Parameter(description = "Firestation object that needs to be added.")
             @RequestBody @Validated({Default.class, Create.class}) Firestation body
     ) {
-        try {
-            FirestationService.UpdateResult res = firestationService.createFirestation(body);
-            return toResponse(res);
-        } catch (FirestationService.ImmutableAddressException e) {
-            throw errorImmutableAddress();
-        }
+        FirestationService.UpdateResult res = firestationService.createFirestation(body);
+        return toResponse(res);
     }
 
     @Operation(

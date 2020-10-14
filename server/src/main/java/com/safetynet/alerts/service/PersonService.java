@@ -22,30 +22,77 @@ public class PersonService {
     private final PersonRepository personRepository;
     private final AddressRepository addressRepository;
 
+    /**
+     * Returns a {@linkplain Person person} by it's ID.
+     *
+     * @param id ID of the person to return
+     * @return the person; or {@code null} if none has the given ID
+     */
     @Transactional
     public Person getPerson(long id) {
         PersonEntity personEntity = personRepository.findById(id).orElse(null);
         return personEntity == null ? null : personEntity.toPerson();
     }
 
+    /**
+     * Create a new {@linkplain Person person}.
+     *
+     * @param body              data (id is ignored)
+     * @param allowSimilarNames whether or not similar names combination are allowed
+     * @return the created person
+     * @throws PersonExistsException       if {@code allowSimilarNames == false} and an existing person has a similar
+     *                                     names combination
+     * @throws InterferingAddressException if a matching address already exists with a different city/zip combination
+     */
     @Transactional
     public UpdateResult createPerson(Person body, boolean allowSimilarNames)
-            throws PersonExistsException, InterferingAddressException, ImmutableNamesException {
+            throws PersonExistsException, InterferingAddressException {
         body.setId(null);
-        return update(null, body, allowSimilarNames, true);
+        try {
+            return update(null, body, allowSimilarNames, true);
+        } catch (ImmutableNamesException e) {
+            throw new RuntimeException("unreachable", e);
+        }
     }
 
+    /**
+     * Update an existing {@linkplain Person person}.
+     *
+     * @param id                ID of the person to update
+     * @param body              data (id is ignored)
+     * @param allowSimilarNames whether or not similar names combination are allowed
+     * @return the updated person; or {@code null} if none has the given ID
+     * @throws PersonExistsException       if {@code allowSimilarNames == false} and an existing person has a similar
+     *                                     names combination
+     * @throws InterferingAddressException if a matching address already exists with a different city/zip combination
+     */
     @Transactional
     public UpdateResult updatePerson(long id, Person body, boolean allowSimilarNames)
-            throws PersonExistsException, InterferingAddressException, ImmutableNamesException {
+            throws PersonExistsException, InterferingAddressException {
         body.setId(id);
         PersonEntity personEntity = personRepository.findById(id).orElse(null);
         if (personEntity == null) {
             return null;
         }
-        return update(personEntity, body, allowSimilarNames, true);
+        try {
+            return update(personEntity, body, allowSimilarNames, true);
+        } catch (ImmutableNamesException e) {
+            throw new RuntimeException("unreachable", e);
+        }
     }
 
+    /**
+     * Update an existing {@linkplain Person person} by it's names.
+     *
+     * @param firstName First name of the person to update
+     * @param lastName  Last name of the person to update
+     * @param body      data (id is ignored)
+     * @return the updated person; or {@code null} if none has the given names
+     * @throws InterferingNamesException   if more than one person has this names combination
+     * @throws PersonExistsException       if an existing person has a similar names combination
+     * @throws InterferingAddressException if a matching address already exists with a different city/zip combination
+     * @throws ImmutableNamesException     if you try to update firstName or lastName
+     */
     @Transactional
     public UpdateResult updatePersonByNames(String firstName, String lastName, Person body)
             throws InterferingNamesException, PersonExistsException, InterferingAddressException, ImmutableNamesException {
@@ -59,11 +106,25 @@ public class PersonService {
         return res;
     }
 
+    /**
+     * Delete a {@linkplain Person person} by it's ID.
+     *
+     * @param id ID of the person to delete
+     * @return {@code true} if the person existed and was deleted; or {@code false} if not
+     */
     @Transactional
     public boolean deletePerson(long id) {
         return personRepository.removeById(id) != 0;
     }
 
+    /**
+     * Delete a {@linkplain Person person} by it's names.
+     *
+     * @param firstName First name of the person to delete
+     * @param lastName  Last name of the person to delete
+     * @return {@code true} if the person existed and was deleted; or {@code false} if not
+     * @throws InterferingNamesException if more than one person has this names combination
+     */
     @Transactional
     public boolean deletePersonByNames(String firstName, String lastName) throws InterferingNamesException {
         long count = personRepository.removeByFirstNameAndLastName(firstName, lastName);
