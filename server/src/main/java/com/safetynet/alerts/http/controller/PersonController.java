@@ -5,10 +5,7 @@ import com.safetynet.alerts.api.model.Person;
 import com.safetynet.alerts.api.validation.constraint.IsName;
 import com.safetynet.alerts.api.validation.group.Create;
 import com.safetynet.alerts.api.validation.group.Update;
-import com.safetynet.alerts.repository.AddressRepository;
-import com.safetynet.alerts.repository.PersonRepository;
-import com.safetynet.alerts.repository.entity.AddressEntity;
-import com.safetynet.alerts.repository.entity.PersonEntity;
+import com.safetynet.alerts.service.PersonService;
 import com.safetynet.alerts.util.ApiErrorCode;
 import com.safetynet.alerts.util.ApiException;
 import com.safetynet.alerts.util.spring.JsonRequestMapping;
@@ -16,7 +13,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.net.URI;
-import java.util.Objects;
 import javax.validation.constraints.NotNull;
 import javax.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +20,6 @@ import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,24 +34,22 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/person")
 @Validated
 public class PersonController {
-    private final PersonRepository personRepository;
-    private final AddressRepository addressRepository;
+    private final PersonService personService;
 
     @Operation(
             summary = "Find person by ID."
     )
     // TODO: Add errors documentation
     @JsonRequestMapping(method = RequestMethod.GET, value = "/{id}")
-    @Transactional
     public Person getPerson(
             @Parameter(description = "ID of person to return.")
             @PathVariable("id") @NotNull Long id
     ) {
-        PersonEntity personEntity = personRepository.findById(id).orElse(null);
-        if (personEntity == null) {
+        Person res = personService.getPerson(id);
+        if (res == null) {
             throw errorPersonNotFound();
         }
-        return personEntity.toPerson();
+        return res;
     }
 
     @Operation(
@@ -64,15 +57,13 @@ public class PersonController {
     )
     // TODO: Add errors documentation
     @JsonRequestMapping(method = RequestMethod.POST)
-    @Transactional
     public ResponseEntity<Void> createPerson(
             @Parameter(description = "Allow creation of this new person even if another person has the same first and last name combination.")
             @RequestParam(value = "allowSimilarNames", defaultValue = "false") boolean allowSimilarNames,
             @Parameter(description = "Person object that needs to be added.")
             @RequestBody @Validated({Default.class, Create.class}) Person body
     ) {
-        body.setId(null);
-        return update(null, body, allowSimilarNames, true);
+        return toResponse(() -> personService.createPerson(body, allowSimilarNames));
     }
 
     @Operation(
@@ -80,7 +71,6 @@ public class PersonController {
     )
     // TODO: Add errors documentation
     @JsonRequestMapping(method = RequestMethod.PUT, value = "/{id}")
-    @Transactional
     public ResponseEntity<Void> updatePerson(
             @Parameter(description = "ID of person that needs to be updated.")
             @PathVariable("id") @NotNull Long id,
@@ -89,12 +79,7 @@ public class PersonController {
             @Parameter(description = "New person object.")
             @RequestBody @Validated({Default.class, Update.class}) Person body
     ) {
-        body.setId(id);
-        PersonEntity personEntity = personRepository.findById(id).orElse(null);
-        if (personEntity == null) {
-            throw errorPersonNotFound();
-        }
-        return update(personEntity, body, allowSimilarNames, true);
+        return toResponse(() -> personService.updatePerson(id, body, allowSimilarNames));
     }
 
     @Operation(
@@ -102,7 +87,6 @@ public class PersonController {
     )
     // TODO: Add errors documentation
     @JsonRequestMapping(method = RequestMethod.PUT)
-    @Transactional
     public ResponseEntity<Void> updatePersonByNames(
             @Parameter(description = "First name of person that needs to be updated.")
             @RequestParam("firstName") @NotNull @IsName String firstName,
@@ -111,17 +95,7 @@ public class PersonController {
             @Parameter(description = "New person object.")
             @RequestBody @Validated({Default.class, Update.class}) Person body
     ) {
-        ResponseEntity<Void> res = null;
-        for (PersonEntity personEntity : personRepository.findAllByFirstNameAndLastName(firstName, lastName)) {
-            if (res != null) {
-                throw errorInterferingNames();
-            }
-            res = update(personEntity, body, false, false);
-        }
-        if (res == null) {
-            throw errorPersonNotFound();
-        }
-        return res;
+        return toResponse(() -> personService.updatePersonByNames(firstName, lastName, body));
     }
 
     @Operation(
@@ -129,12 +103,11 @@ public class PersonController {
     )
     // TODO: Add errors documentation
     @JsonRequestMapping(method = RequestMethod.DELETE, value = "/{id}")
-    @Transactional
     public ResponseEntity<Void> deletePerson(
             @Parameter(description = "ID of person that needs to be deleted.")
             @PathVariable("id") @NotNull Long id
     ) {
-        if (personRepository.removeById(id) == 0) {
+        if (!personService.deletePerson(id)) {
             throw errorPersonNotFound();
         }
         return ResponseEntity.noContent().build();
@@ -145,90 +118,60 @@ public class PersonController {
     )
     // TODO: Add errors documentation
     @JsonRequestMapping(method = RequestMethod.DELETE)
-    @Transactional
     public ResponseEntity<Void> deletePersonByNames(
             @Parameter(description = "First name of person that needs to be deleted.")
             @RequestParam("firstName") @NotNull @IsName String firstName,
             @Parameter(description = "Last name of person that needs to be deleted.")
             @RequestParam("lastName") @NotNull @IsName String lastName
     ) {
-        long count = personRepository.removeByFirstNameAndLastName(firstName, lastName);
-        if (count == 0) {
-            throw errorPersonNotFound();
-        }
-        if (count > 1) {
+        try {
+            if (!personService.deletePersonByNames(firstName, lastName)) {
+                throw errorPersonNotFound();
+            }
+            return ResponseEntity.noContent().build();
+        } catch (PersonService.InterferingNamesException e) {
             throw errorInterferingNames();
         }
-        return ResponseEntity.noContent().build();
     }
 
-    /**
-     * Create or update the person entity from it's model.
-     *
-     * @param entity            the existing entity; or {@code null} to create one
-     * @param body              the person model to apply
-     * @param allowSimilarNames whether or not similar names combination are allowed
-     * @param allowUpdateNames  whether or not names updates are allowed
-     * @return the REST response
-     */
-    private ResponseEntity<Void> update(PersonEntity entity, Person body, boolean allowSimilarNames,
-            boolean allowUpdateNames) {
-        // prevent similar names combination if it was not allowed
-        boolean create = (entity == null);
-        if (create && !allowSimilarNames && personRepository
-                .existsByFirstNameAndLastName(body.getFirstName(), body.getLastName())) {
+    private ResponseEntity<Void> toResponse(UpdateFunction fct) {
+        PersonService.UpdateResult res;
+        try {
+            res = fct.call();
+        } catch (PersonService.InterferingNamesException e) {
+            throw errorInterferingNames();
+        } catch (PersonService.PersonExistsException e) {
             throw errorPersonExists();
-        }
-
-        // retrieve or create the address
-        AddressEntity addressEntity = addressRepository.findByAddress(body.getAddress()).orElse(null);
-        if (addressEntity == null) {
-            addressEntity = new AddressEntity();
-            addressEntity.setAddress(body.getAddress());
-            addressEntity.setCity(body.getCity());
-            addressEntity.setZip(body.getZip());
-            addressRepository.save(addressEntity);
-        } else if (!addressEntity.isComplete()) {
-            addressEntity.setCity(body.getCity());
-            addressEntity.setZip(body.getZip());
-            addressRepository.save(addressEntity);
-        } else if (!body.getCity().equals(addressEntity.getCity())
-                || !body.getZip().equals(addressEntity.getZip())) {
+        } catch (PersonService.InterferingAddressException e) {
             throw errorInterferingAddress();
-        }
-
-        // create or update the person
-        if (create) {
-            entity = new PersonEntity();
-            entity.setId(body.getId());
-        }
-        if (create || allowUpdateNames) {
-            entity.setFirstName(body.getFirstName());
-            entity.setLastName(body.getLastName());
-        } else if (!Objects.equals(entity.getFirstName(), body.getFirstName())
-                || !Objects.equals(entity.getLastName(), body.getLastName())) {
+        } catch (PersonService.ImmutableNamesException e) {
             throw errorImmutableNames();
         }
-        entity.setAddress(addressEntity);
-        entity.setPhone(body.getPhone());
-        entity.setEmail(body.getEmail());
-        personRepository.save(entity);
-
-        // returns rest response
-        if (create) {
-            return ResponseEntity.created(getLocation(entity)).build();
-        } else {
-            return ResponseEntity.noContent().location(getLocation(entity)).build();
+        if (res == null) {
+            throw errorPersonNotFound();
         }
+        if (res.isCreated()) {
+            return ResponseEntity.created(getLocation(res.getPerson())).build();
+        } else {
+            return ResponseEntity.noContent().location(getLocation(res.getPerson())).build();
+        }
+    }
+
+    private interface UpdateFunction {
+        PersonService.UpdateResult call() throws
+                PersonService.InterferingNamesException,
+                PersonService.PersonExistsException,
+                PersonService.InterferingAddressException,
+                PersonService.ImmutableNamesException;
     }
 
     /**
      * Returns the URL to a person.
      */
     @SneakyThrows
-    private URI getLocation(PersonEntity personEntity) {
+    private URI getLocation(Person person) {
         // TODO: Returns full URI instead of relative
-        return new URI("/person/" + personEntity.getId());
+        return new URI("/person/" + person.getId());
     }
 
     /**
