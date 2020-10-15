@@ -1,4 +1,4 @@
-# SafetyNet Alerts &middot; [![Build Status](https://travis-ci.com/np111/P5_safetynet.svg?branch=master)](https://travis-ci.com/np111/P5_safetynet)
+# SafetyNet Alerts &middot; [![Build Status](https://travis-ci.com/np111/P5_safetynet.svg?branch=master)](https://travis-ci.com/np111/P5_safetynet) [![codecov.io](https://codecov.io/github/np111/P5_safetynet/coverage.svg?branch=master)](https://codecov.io/github/np111/P5_safetynet?branch=master)
 
 ## Documentation
 
