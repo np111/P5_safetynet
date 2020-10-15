@@ -151,6 +151,18 @@
           </execution>
         </executions>
       </plugin>
+      <!-- Javadoc configuration -->
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <offlineLinks>
+            <offlineLink>
+              <url>../api</url>
+              <location>../../../../api/target/site/apidocs</location>
+            </offlineLink>
+          </offlineLinks>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 </project>
