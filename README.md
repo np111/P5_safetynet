@@ -1,4 +1,4 @@
-# SafetyNet Alerts
+# SafetyNet Alerts &middot; [![Build Status](https://travis-ci.com/np111/P5_safetynet.svg?branch=master)](https://travis-ci.com/np111/P5_safetynet)
 
 ## Documentation
 
