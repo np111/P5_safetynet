@@ -23,6 +23,7 @@
 
     <!-- Dependencies versions -->
     <lombok.version>1.18.12</lombok.version>
+    <lombok-maven-plugin.version>1.18.12.0</lombok-maven-plugin.version>
     <junit-jupiter.version>5.6.2</junit-jupiter.version>
     <junit-platform.version>1.6.2</junit-platform.version>
     <mockito-junit-jupiter.version>3.4.6</mockito-junit-jupiter.version>
@@ -74,6 +75,50 @@
   </dependencies>
 
   <build>
+    <finalName>${project.artifactId}</finalName>
+    <pluginManagement>
+      <plugins>
+        <!-- lock down plugins versions to avoid using Maven defaults -->
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>3.1.0</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>3.2.0</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.8.1</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.22.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.2.0</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.5.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.8.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>3.2.0</version>
+          <configuration>
+            <quiet>true</quiet>
+            <show>public</show>
+            <nohelp>true</nohelp>
+            <doclint>none</doclint>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <plugins>
       <!-- Jacoco (tests coverage) -->
       <plugin>
@@ -97,4 +142,42 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>delombok-javadoc</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok-maven-plugin</artifactId>
+            <version>${lombok-maven-plugin.version}</version>
+            <configuration>
+              <sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
+              <outputDirectory>${project.build.outputDirectory}/delombok-sources</outputDirectory>
+              <addOutputDirectory>false</addOutputDirectory>
+            </configuration>
+            <executions>
+              <execution>
+                <phase>generate-sources</phase>
+                <goals>
+                  <goal>delombok</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <configuration>
+              <sourcepath>${project.build.outputDirectory}/delombok-sources</sourcepath>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
