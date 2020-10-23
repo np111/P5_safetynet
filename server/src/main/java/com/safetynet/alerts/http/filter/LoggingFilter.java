@@ -35,10 +35,10 @@ public class LoggingFilter extends OncePerRequestFilter {
     private final boolean includePayload;
 
     @Autowired
-    public LoggingFilter(ObjectMapper objectMapper, HttpLoggingProperties props) {
+    public LoggingFilter(ObjectMapper objectMapper, @Autowired(required = false) HttpLoggingProperties props) {
         this.objectMapper = objectMapper;
-        this.enabled = props.isEnabled();
-        this.includePayload = props.isIncludePayload();
+        this.enabled = props != null && props.isEnabled();
+        this.includePayload = props != null && props.isIncludePayload();
     }
 
     @Override

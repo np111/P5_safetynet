@@ -8,6 +8,7 @@ import com.safetynet.alerts.api.validation.group.Update;
 import com.safetynet.alerts.service.FirestationService;
 import com.safetynet.alerts.util.ApiErrorCode;
 import com.safetynet.alerts.util.ApiException;
+import com.safetynet.alerts.util.UriUtil;
 import com.safetynet.alerts.util.spring.JsonRequestMapping;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -17,7 +18,6 @@ import java.nio.charset.StandardCharsets;
 import javax.validation.constraints.NotNull;
 import javax.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,7 +48,7 @@ public class FirestationController {
     ) {
         Firestation res = firestationService.getFirestation(address);
         if (res == null) {
-            throw errorFirestationNotFound();
+            throw new ApiException(errorFirestationNotFound());
         }
         return res;
     }
@@ -81,7 +81,7 @@ public class FirestationController {
             FirestationService.UpdateResult res = firestationService.updateFirestation(address, body);
             return toResponse(res);
         } catch (FirestationService.ImmutableAddressException e) {
-            throw errorImmutableAddress();
+            throw new ApiException(errorImmutableAddress());
         }
     }
 
@@ -95,7 +95,7 @@ public class FirestationController {
             @RequestParam("address") @NotNull @IsAddress String address
     ) {
         if (!firestationService.deleteFirestation(address)) {
-            throw errorFirestationNotFound();
+            throw new ApiException(errorFirestationNotFound());
         }
         return ResponseEntity.noContent().build();
     }
@@ -112,34 +112,32 @@ public class FirestationController {
     /**
      * Returns the URL to a firestation.
      */
-    @SneakyThrows
     private URI getLocation(Firestation firestation) {
-        // TODO: Returns full URI instead of relative
-        return new URI("/firestation/get?address="
+        return UriUtil.createUri("/firestation/get?address="
                 + UriUtils.encodeQueryParam(firestation.getAddress(), StandardCharsets.UTF_8));
     }
 
     /**
      * Returns a CLIENT/BAD_REQUEST error when an address cannot be updated.
      */
-    private ApiException errorImmutableAddress() {
-        return new ApiException(ApiError.builder()
+    static ApiError errorImmutableAddress() {
+        return ApiError.builder()
                 .type(ApiError.ErrorType.CLIENT)
                 .status(HttpStatus.BAD_REQUEST.value())
                 .code(ApiErrorCode.BAD_REQUEST)
                 .message("address cannot be updated")
-                .build());
+                .build();
     }
 
     /**
      * Returns a SERVICE/NOT_FOUND error when a firestation does not exists.
      */
-    private ApiException errorFirestationNotFound() {
-        return new ApiException(ApiError.builder()
+    static ApiError errorFirestationNotFound() {
+        return ApiError.builder()
                 .type(ApiError.ErrorType.SERVICE)
                 .status(HttpStatus.NOT_FOUND.value())
                 .code(ApiErrorCode.NOT_FOUND)
                 .message("address not found")
-                .build());
+                .build();
     }
 }

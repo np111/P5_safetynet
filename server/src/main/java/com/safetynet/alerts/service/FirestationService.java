@@ -100,17 +100,14 @@ public class FirestationService {
         addressRepository.save(entity);
 
         // returns result
-        return new UpdateResult(create, entity);
+        return new UpdateResult(create, AddressMapper.getInstance().toFirestation(entity));
     }
 
     @RequiredArgsConstructor
+    @Getter
     public static class UpdateResult {
-        private final @Getter boolean created;
-        private final @NonNull AddressEntity addressEntity;
-
-        public @NonNull Firestation getFirestation() {
-            return AddressMapper.getInstance().toFirestation(addressEntity);
-        }
+        private final boolean created;
+        private final @NonNull Firestation firestation;
     }
 
     public static class ImmutableAddressException extends FastException {

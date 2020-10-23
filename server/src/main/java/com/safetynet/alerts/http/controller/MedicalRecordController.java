@@ -8,6 +8,7 @@ import com.safetynet.alerts.api.validation.group.Update;
 import com.safetynet.alerts.service.MedicalRecordService;
 import com.safetynet.alerts.util.ApiErrorCode;
 import com.safetynet.alerts.util.ApiException;
+import com.safetynet.alerts.util.UriUtil;
 import com.safetynet.alerts.util.spring.JsonRequestMapping;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -16,7 +17,6 @@ import java.net.URI;
 import javax.validation.constraints.NotNull;
 import javax.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,7 +48,7 @@ public class MedicalRecordController {
     ) {
         MedicalRecord res = medicalRecordService.getMedicalRecord(id);
         if (res == null) {
-            throw errorMedicalRecordNotFound();
+            throw new ApiException(errorMedicalRecordNotFound());
         }
         return res;
     }
@@ -105,7 +105,7 @@ public class MedicalRecordController {
             @PathVariable("personId") @NotNull Long id
     ) {
         if (!medicalRecordService.deleteMedicalRecord(id)) {
-            throw errorMedicalRecordNotFound();
+            throw new ApiException(errorMedicalRecordNotFound());
         }
         return ResponseEntity.noContent().build();
     }
@@ -123,11 +123,11 @@ public class MedicalRecordController {
     ) {
         try {
             if (!medicalRecordService.deleteMedicalRecordByNames(firstName, lastName)) {
-                throw errorMedicalRecordNotFound();
+                throw new ApiException(errorMedicalRecordNotFound());
             }
             return ResponseEntity.noContent().build();
         } catch (MedicalRecordService.InterferingNamesException e) {
-            throw errorInterferingNames();
+            throw new ApiException(errorInterferingNames());
         }
     }
 
@@ -136,14 +136,14 @@ public class MedicalRecordController {
         try {
             res = fct.call();
         } catch (MedicalRecordService.InterferingNamesException e) {
-            throw errorInterferingNames();
+            throw new ApiException(errorInterferingNames());
         } catch (MedicalRecordService.PersonNotFoundException e) {
-            throw errorPersonNotFound();
+            throw new ApiException(errorPersonNotFound());
         } catch (MedicalRecordService.MedicalRecordExistsException e) {
-            throw errorMedicalRecordExists();
+            throw new ApiException(errorMedicalRecordExists());
         }
         if (res == null) {
-            throw errorMedicalRecordNotFound();
+            throw new ApiException(errorMedicalRecordNotFound());
         }
         if (res.isCreated()) {
             return ResponseEntity.created(getLocation(res.getMedicalRecord())).build();
@@ -162,58 +162,55 @@ public class MedicalRecordController {
     /**
      * Returns the URL to a medical record.
      */
-    @SneakyThrows
     private URI getLocation(MedicalRecord medicalRecord) {
-        // TODO: Returns full URI instead of relative
-        return new URI("/medicalRecord/" + medicalRecord.getPersonId());
+        return UriUtil.createUri("/medicalRecord/" + medicalRecord.getPersonId());
     }
 
     /**
      * Returns a SERVICE/ALREADY_EXISTS error when a medical record already exists for a person.
      */
-    private ApiException errorMedicalRecordExists() {
-        return new ApiException(ApiError.builder()
+    static ApiError errorMedicalRecordExists() {
+        return ApiError.builder()
                 .type(ApiError.ErrorType.SERVICE)
                 .status(HttpStatus.CONFLICT.value())
                 .code(ApiErrorCode.ALREADY_EXISTS)
                 .message("A medical record already exists for this person")
-                .build());
+                .build();
     }
 
     /**
      * Returns a SERVICE/NOT_FOUND error when a medical record does not exists.
      */
-    private ApiException errorMedicalRecordNotFound() {
-        return new ApiException(ApiError.builder()
+    static ApiError errorMedicalRecordNotFound() {
+        return ApiError.builder()
                 .type(ApiError.ErrorType.SERVICE)
                 .status(HttpStatus.NOT_FOUND.value())
                 .code(ApiErrorCode.NOT_FOUND)
                 .message("Medical record not found")
-                .build());
+                .build();
     }
 
     /**
      * Returns a SERVICE/NOT_FOUND error when a person does not exists.
      */
-    private ApiException errorPersonNotFound() {
-        return new ApiException(ApiError.builder()
+    static ApiError errorPersonNotFound() {
+        return ApiError.builder()
                 .type(ApiError.ErrorType.SERVICE)
                 .status(HttpStatus.NOT_FOUND.value())
                 .code(ApiErrorCode.NOT_FOUND)
                 .message("The person linked to this medical file cannot be found")
-                .build());
+                .build();
     }
 
     /**
-     * Returns a SERVICE/INTERFERING_NAMES error when identifying a person by first and last names is impossible because
-     * multiples persons share the same names.
+     * Returns a SERVICE/INTERFERING_NAMES error when identifying a person by first and last names is impossible because multiples persons share the same names.
      */
-    private ApiException errorInterferingNames() {
-        return new ApiException(ApiError.builder()
+    static ApiError errorInterferingNames() {
+        return ApiError.builder()
                 .type(ApiError.ErrorType.SERVICE)
                 .status(HttpStatus.CONFLICT.value())
                 .code(ApiErrorCode.INTERFERING_NAMES)
                 .message("Multiple medical records share this names combination, use ID instead")
-                .build());
+                .build();
     }
 }

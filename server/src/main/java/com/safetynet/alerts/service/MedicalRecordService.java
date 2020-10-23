@@ -152,7 +152,7 @@ public class MedicalRecordService {
         medicalRecordRepository.save(entity);
 
         // returns response
-        return new UpdateResult(create, entity);
+        return new UpdateResult(create, MedicalRecordMapper.getInstance().toMedicalRecord(entity));
     }
 
     /**
@@ -184,13 +184,10 @@ public class MedicalRecordService {
     }
 
     @RequiredArgsConstructor
+    @Getter
     public static class UpdateResult {
-        private final @Getter boolean created;
-        private final @NonNull MedicalRecordEntity medicalRecordEntity;
-
-        public @NonNull MedicalRecord getMedicalRecord() {
-            return MedicalRecordMapper.getInstance().toMedicalRecord(medicalRecordEntity);
-        }
+        private final boolean created;
+        private final @NonNull MedicalRecord medicalRecord;
     }
 
     public static class MedicalRecordExistsException extends FastException {

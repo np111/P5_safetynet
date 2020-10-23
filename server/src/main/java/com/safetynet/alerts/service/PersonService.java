@@ -40,8 +40,7 @@ public class PersonService {
      * @param body              data (id is ignored)
      * @param allowSimilarNames whether or not similar names combination are allowed
      * @return the created person
-     * @throws PersonExistsException       if {@code allowSimilarNames == false} and an existing person has a similar
-     *                                     names combination
+     * @throws PersonExistsException       if {@code allowSimilarNames == false} and an existing person has a similar names combination
      * @throws InterferingAddressException if a matching address already exists with a different city/zip combination
      */
     @Transactional
@@ -62,8 +61,7 @@ public class PersonService {
      * @param body              data (id is ignored)
      * @param allowSimilarNames whether or not similar names combination are allowed
      * @return the updated person; or {@code null} if none has the given ID
-     * @throws PersonExistsException       if {@code allowSimilarNames == false} and an existing person has a similar
-     *                                     names combination
+     * @throws PersonExistsException       if {@code allowSimilarNames == false} and an existing person has a similar names combination
      * @throws InterferingAddressException if a matching address already exists with a different city/zip combination
      */
     @Transactional
@@ -191,17 +189,14 @@ public class PersonService {
         personRepository.save(entity);
 
         // returns result
-        return new UpdateResult(create, entity);
+        return new UpdateResult(create, PersonMapper.getInstance().toPerson(entity));
     }
 
     @RequiredArgsConstructor
+    @Getter
     public static class UpdateResult {
-        private final @Getter boolean created;
-        private final @NonNull PersonEntity personEntity;
-
-        public @NonNull Person getPerson() {
-            return PersonMapper.getInstance().toPerson(personEntity);
-        }
+        private final boolean created;
+        private final @NonNull Person person;
     }
 
     public static class PersonExistsException extends FastException {

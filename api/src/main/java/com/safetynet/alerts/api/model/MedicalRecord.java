@@ -16,6 +16,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Singular;
 import lombok.SneakyThrows;
 
 /**
@@ -46,10 +47,12 @@ public class MedicalRecord implements Cloneable {
 
     @NotNull(groups = Update.class)
     @IsMedicationCollection
+    @Singular("medication")
     private List<@NotNull @IsMedication String> medications;
 
     @NotNull(groups = Update.class)
     @IsAllergyCollection
+    @Singular("allergy")
     private List<@NotNull @IsAllergy String> allergies;
 
     @SneakyThrows

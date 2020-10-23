@@ -1,9 +1,12 @@
 package com.safetynet.alerts.http.controller;
 
 
+import com.fasterxml.jackson.databind.JsonMappingException.Reference;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.safetynet.alerts.api.model.ApiError;
 import com.safetynet.alerts.util.ApiErrorCode;
 import com.safetynet.alerts.util.ApiException;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -25,6 +28,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 @ControllerAdvice
@@ -50,6 +54,16 @@ public class ExceptionController {
     @ResponseBody
     public ResponseEntity<ApiError> handleHttpMessageNotReadableException(HttpMessageNotReadableException e,
             HttpServletRequest req) {
+        if (e.getMessage() != null && e.getMessage().startsWith("Required request body is missing")) {
+            return toResponse(errorValidationFailed("is required", "body", null, null));
+        }
+        if (e.getCause() instanceof InvalidFormatException) {
+            InvalidFormatException ex = (InvalidFormatException) e.getCause();
+            String parameter = ex.getPath().stream().map(Reference::getFieldName).collect(Collectors.joining("."));
+            Map<String, Object> attributes = new LinkedHashMap<>();
+            attributes.put("parserMessage", ex.getOriginalMessage());
+            return toResponse(errorValidationFailed("is badly formatted", parameter, null, attributes));
+        }
         return toResponse(errorBadRequest(e.getMessage()));
     }
 
@@ -66,16 +80,27 @@ public class ExceptionController {
     }
 
     /**
-     * Handles missing @RequestParam. Treated as a failed @NotNull validation.
+     * Handles missing @RequestParam.
      */
     @ExceptionHandler(MissingServletRequestParameterException.class)
     @ResponseBody
     public ResponseEntity<ApiError> handleMissingRequestParamException(MissingServletRequestParameterException e,
             HttpServletRequest req) {
-        String message = "must not be null";
+        String message = "is required";
         String parameter = e.getParameterName();
-        String constraint = "NotNull";
-        return toResponse(errorValidationFailed(message, parameter, constraint, null));
+        return toResponse(errorValidationFailed(message, parameter, null, null));
+    }
+
+    /**
+     * Handles bad types @RequestParam.
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseBody
+    public ResponseEntity<ApiError> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException e,
+            HttpServletRequest req) {
+        String message = "must be a " + e.getParameter().getParameterType().getSimpleName();
+        String parameter = e.getName();
+        return toResponse(errorValidationFailed(message, parameter, null, null));
     }
 
     /**

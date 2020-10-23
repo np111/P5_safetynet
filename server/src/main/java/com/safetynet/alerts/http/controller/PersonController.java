@@ -8,6 +8,7 @@ import com.safetynet.alerts.api.validation.group.Update;
 import com.safetynet.alerts.service.PersonService;
 import com.safetynet.alerts.util.ApiErrorCode;
 import com.safetynet.alerts.util.ApiException;
+import com.safetynet.alerts.util.UriUtil;
 import com.safetynet.alerts.util.spring.JsonRequestMapping;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -16,7 +17,6 @@ import java.net.URI;
 import javax.validation.constraints.NotNull;
 import javax.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,7 +47,7 @@ public class PersonController {
     ) {
         Person res = personService.getPerson(id);
         if (res == null) {
-            throw errorPersonNotFound();
+            throw new ApiException(errorPersonNotFound());
         }
         return res;
     }
@@ -108,7 +108,7 @@ public class PersonController {
             @PathVariable("id") @NotNull Long id
     ) {
         if (!personService.deletePerson(id)) {
-            throw errorPersonNotFound();
+            throw new ApiException(errorPersonNotFound());
         }
         return ResponseEntity.noContent().build();
     }
@@ -126,11 +126,11 @@ public class PersonController {
     ) {
         try {
             if (!personService.deletePersonByNames(firstName, lastName)) {
-                throw errorPersonNotFound();
+                throw new ApiException(errorPersonNotFound());
             }
             return ResponseEntity.noContent().build();
         } catch (PersonService.InterferingNamesException e) {
-            throw errorInterferingNames();
+            throw new ApiException(errorInterferingNames());
         }
     }
 
@@ -139,16 +139,16 @@ public class PersonController {
         try {
             res = fct.call();
         } catch (PersonService.InterferingNamesException e) {
-            throw errorInterferingNames();
+            throw new ApiException(errorInterferingNames());
         } catch (PersonService.PersonExistsException e) {
-            throw errorPersonExists();
+            throw new ApiException(errorPersonExists());
         } catch (PersonService.InterferingAddressException e) {
-            throw errorInterferingAddress();
+            throw new ApiException(errorInterferingAddress());
         } catch (PersonService.ImmutableNamesException e) {
-            throw errorImmutableNames();
+            throw new ApiException(errorImmutableNames());
         }
         if (res == null) {
-            throw errorPersonNotFound();
+            throw new ApiException(errorPersonNotFound());
         }
         if (res.isCreated()) {
             return ResponseEntity.created(getLocation(res.getPerson())).build();
@@ -168,71 +168,67 @@ public class PersonController {
     /**
      * Returns the URL to a person.
      */
-    @SneakyThrows
     private URI getLocation(Person person) {
-        // TODO: Returns full URI instead of relative
-        return new URI("/person/" + person.getId());
+        return UriUtil.createUri("/person/" + person.getId());
     }
 
     /**
      * Returns a CLIENT/BAD_REQUEST error when firstName and lastName cannot be updated.
      */
-    private ApiException errorImmutableNames() {
-        return new ApiException(ApiError.builder()
+    static ApiError errorImmutableNames() {
+        return ApiError.builder()
                 .type(ApiError.ErrorType.CLIENT)
                 .status(HttpStatus.BAD_REQUEST.value())
                 .code(ApiErrorCode.BAD_REQUEST)
                 .message("firstName and lastName cannot be updated in this context, use ID instead")
-                .build());
+                .build();
     }
 
     /**
      * Returns a SERVICE/ALREADY_EXISTS error when similar names combination are not allowed.
      */
-    private ApiException errorPersonExists() {
-        return new ApiException(ApiError.builder()
+    static ApiError errorPersonExists() {
+        return ApiError.builder()
                 .type(ApiError.ErrorType.SERVICE)
                 .status(HttpStatus.CONFLICT.value())
                 .code(ApiErrorCode.ALREADY_EXISTS)
                 .message("A person with a similar names combination already exists")
-                .build());
+                .build();
     }
 
     /**
      * Returns a SERVICE/NOT_FOUND error when a person does not exists.
      */
-    private ApiException errorPersonNotFound() {
-        return new ApiException(ApiError.builder()
+    static ApiError errorPersonNotFound() {
+        return ApiError.builder()
                 .type(ApiError.ErrorType.SERVICE)
                 .status(HttpStatus.NOT_FOUND.value())
                 .code(ApiErrorCode.NOT_FOUND)
                 .message("Person not found")
-                .build());
+                .build();
     }
 
     /**
-     * Returns a SERVICE/INTERFERING_NAMES error when identifying a person by first and last names is impossible because
-     * multiples persons share the same names.
+     * Returns a SERVICE/INTERFERING_NAMES error when identifying a person by first and last names is impossible because multiples persons share the same names.
      */
-    private ApiException errorInterferingNames() {
-        return new ApiException(ApiError.builder()
+    static ApiError errorInterferingNames() {
+        return ApiError.builder()
                 .type(ApiError.ErrorType.SERVICE)
                 .status(HttpStatus.CONFLICT.value())
                 .code(ApiErrorCode.INTERFERING_NAMES)
                 .message("Multiple persons share this names combination, use ID instead")
-                .build());
+                .build();
     }
 
     /**
-     * Returns a SERVICE/INTERFERING_ADDRESS error for attempts to create an invalid address (with bad city/zip
-     * combination).
+     * Returns a SERVICE/INTERFERING_ADDRESS error for attempts to create an invalid address (with bad city/zip combination).
      */
-    private ApiException errorInterferingAddress() {
-        return new ApiException(ApiError.builder()
+    static ApiError errorInterferingAddress() {
+        return ApiError.builder()
                 .type(ApiError.ErrorType.SERVICE)
                 .status(HttpStatus.CONFLICT.value())
                 .code(ApiErrorCode.INTERFERING_ADDRESS)
                 .message("A matching address already exists with a different city/zip combination")
-                .build());
+                .build();
     }
 }
