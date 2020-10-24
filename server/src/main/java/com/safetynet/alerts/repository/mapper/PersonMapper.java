@@ -6,17 +6,12 @@ import com.safetynet.alerts.repository.entity.MedicalRecordEntity;
 import com.safetynet.alerts.repository.entity.PersonEntity;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Component
+@Scope("singleton")
 public final class PersonMapper {
-    private static final PersonMapper INSTANCE = new PersonMapper();
-
-    public static PersonMapper getInstance() {
-        return INSTANCE;
-    }
-
     public Person toPerson(PersonEntity entity) {
         if (entity == null) {
             return null;

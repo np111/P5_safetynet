@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Scope("singleton")
 public class FirestationService {
     private final AddressRepository addressRepository;
+    private final AddressMapper addressMapper;
 
     /**
      * Returns a {@linkplain Firestation firestation} by it's address.
@@ -28,7 +29,7 @@ public class FirestationService {
      */
     @Transactional
     public Firestation getFirestation(String address) {
-        return AddressMapper.getInstance().toFirestation(addressRepository.findByAddress(address).orElse(null));
+        return addressMapper.toFirestation(addressRepository.findByAddress(address).orElse(null));
     }
 
     /**
@@ -97,7 +98,7 @@ public class FirestationService {
         addressRepository.save(entity);
 
         // returns result
-        return new UpdateResult(create, AddressMapper.getInstance().toFirestation(entity));
+        return new UpdateResult(create, addressMapper.toFirestation(entity));
     }
 
     @RequiredArgsConstructor

@@ -2,17 +2,12 @@ package com.safetynet.alerts.repository.mapper;
 
 import com.safetynet.alerts.api.model.Firestation;
 import com.safetynet.alerts.repository.entity.AddressEntity;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Component
+@Scope("singleton")
 public final class AddressMapper {
-    private static final AddressMapper INSTANCE = new AddressMapper();
-
-    public static AddressMapper getInstance() {
-        return INSTANCE;
-    }
-
     public Firestation toFirestation(AddressEntity entity) {
         if (entity == null || entity.getFirestation() == null) {
             return null;

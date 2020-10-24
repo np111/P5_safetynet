@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MedicalRecordService {
     private final MedicalRecordRepository medicalRecordRepository;
     private final PersonRepository personRepository;
+    private final MedicalRecordMapper medicalRecordMapper;
 
     /**
      * Returns a {@linkplain MedicalRecord medical record} by it's ID.
@@ -30,7 +31,7 @@ public class MedicalRecordService {
      */
     @Transactional
     public MedicalRecord getMedicalRecord(long id) {
-        return MedicalRecordMapper.getInstance().toMedicalRecord(medicalRecordRepository.findById(id).orElse(null));
+        return medicalRecordMapper.toMedicalRecord(medicalRecordRepository.findById(id).orElse(null));
     }
 
     /**
@@ -143,7 +144,7 @@ public class MedicalRecordService {
         medicalRecordRepository.save(entity);
 
         // returns response
-        return new UpdateResult(create, MedicalRecordMapper.getInstance().toMedicalRecord(entity));
+        return new UpdateResult(create, medicalRecordMapper.toMedicalRecord(entity));
     }
 
     /**

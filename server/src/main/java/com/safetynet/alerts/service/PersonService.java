@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class PersonService {
     private final PersonRepository personRepository;
     private final AddressRepository addressRepository;
+    private final PersonMapper personMapper;
 
     /**
      * Returns a {@linkplain Person person} by it's ID.
@@ -31,7 +32,7 @@ public class PersonService {
      */
     @Transactional
     public Person getPerson(long id) {
-        return PersonMapper.getInstance().toPerson(personRepository.findById(id).orElse(null));
+        return personMapper.toPerson(personRepository.findById(id).orElse(null));
     }
 
     /**
@@ -176,7 +177,7 @@ public class PersonService {
         personRepository.save(entity);
 
         // returns result
-        return new UpdateResult(create, PersonMapper.getInstance().toPerson(entity));
+        return new UpdateResult(create, personMapper.toPerson(entity));
     }
 
     @RequiredArgsConstructor

@@ -4,17 +4,12 @@ import com.safetynet.alerts.api.model.MedicalRecord;
 import com.safetynet.alerts.repository.entity.MedicalRecordEntity;
 import com.safetynet.alerts.repository.entity.PersonEntity;
 import java.util.ArrayList;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Component
+@Scope("singleton")
 public final class MedicalRecordMapper {
-    private static final MedicalRecordMapper INSTANCE = new MedicalRecordMapper();
-
-    public static MedicalRecordMapper getInstance() {
-        return INSTANCE;
-    }
-
     public MedicalRecord toMedicalRecord(MedicalRecordEntity entity) {
         if (entity == null) {
             return null;
