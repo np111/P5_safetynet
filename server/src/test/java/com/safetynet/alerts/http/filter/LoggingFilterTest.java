@@ -77,7 +77,10 @@ class LoggingFilterTest {
                         .build(),
 
                 // Response (with body) + Payload disabled
-                // TODO
+                Context.builder().enabled(true).uri(URI).responseType("application/json").responseBody(JSON_BODY)
+                        .info("HTTP < 127.0.0.1 GET \"" + URI + "\"")
+                        .info("HTTP > 200 -")
+                        .build(),
 
                 // Response (with body) + Payload enabled
                 Context.builder().enabled(true).includePayloads(true).uri(URI).responseType("application/json").responseBody(JSON_BODY)
@@ -85,14 +88,23 @@ class LoggingFilterTest {
                         .info("HTTP > 200 - " + JSON_BODY)
                         .build(),
 
+                Context.builder().enabled(true).includePayloads(true).uri(URI).responseType("not-j-s-o-n").responseBody(JSON_BODY)
+                        .info("HTTP < 127.0.0.1 GET \"" + URI + "\"")
+                        .info("HTTP > 200 -")
+                        .build(),
+
                 // Non-200 responses
+                Context.builder().enabled(true).uri(URI).responseStatus(101)
+                        .info("HTTP < 127.0.0.1 GET \"" + URI + "\"")
+                        .error("HTTP > 101 -")
+                        .build(),
                 Context.builder().enabled(true).uri(URI).responseStatus(203)
                         .info("HTTP < 127.0.0.1 GET \"" + URI + "\"")
                         .info("HTTP > 203 -")
                         .build(),
                 Context.builder().enabled(true).uri(URI).responseStatus(302)
                         .info("HTTP < 127.0.0.1 GET \"" + URI + "\"")
-                        .info("HTTP > 302 -")
+                        .info("HTTP > 302 \"/redirected\"")
                         .build(),
                 Context.builder().enabled(true).uri(URI).responseStatus(404)
                         .info("HTTP < 127.0.0.1 GET \"" + URI + "\"")
@@ -109,11 +121,15 @@ class LoggingFilterTest {
                 @Override
                 public void doFilter(ServletRequest req, ServletResponse res) throws IOException, ServletException {
                     super.doFilter(req, res);
-                    ((HttpServletResponse) res).setStatus(ctx.getResponseStatus());
-                    res.setContentType(ctx.getResponseType());
+                    HttpServletResponse httpRes = (HttpServletResponse) res;
+                    httpRes.setStatus(ctx.getResponseStatus());
+                    if (ctx.getResponseStatus() / 100 == 3) {
+                        httpRes.setHeader("Location", "/redirected");
+                    }
+                    httpRes.setContentType(ctx.getResponseType());
                     String body = ctx.getResponseBody();
                     if (body != null) {
-                        res.getOutputStream().write(body.getBytes(StandardCharsets.UTF_8));
+                        httpRes.getOutputStream().write(body.getBytes(StandardCharsets.UTF_8));
                     }
                 }
             };
