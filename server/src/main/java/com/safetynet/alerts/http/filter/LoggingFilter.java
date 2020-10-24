@@ -76,6 +76,14 @@ public class LoggingFilter extends OncePerRequestFilter {
         return enabled;
     }
 
+    protected void logInfo(String message) {
+        logger.info(message);
+    }
+
+    protected void logError(String message) {
+        logger.error(message);
+    }
+
     private void logBefore(RequestWrapper requestWrapper) {
         HttpServletRequest request = requestWrapper.getRequest();
 
@@ -94,7 +102,7 @@ public class LoggingFilter extends OncePerRequestFilter {
             }
         }
 
-        logger.info(msg.toString());
+        logInfo(msg.toString());
     }
 
     private void logAfter(RequestWrapper requestWrapper, HttpServletResponse response) {
@@ -123,9 +131,9 @@ public class LoggingFilter extends OncePerRequestFilter {
         }
 
         if (status >= 200 && status < 400) {
-            logger.info(msg.toString());
+            logInfo(msg.toString());
         } else {
-            logger.error(msg.toString());
+            logError(msg.toString());
         }
     }
 
