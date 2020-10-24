@@ -21,12 +21,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import static com.safetynet.alerts.http.controller.ExceptionController.errorToResponse;
 
 @Tag(name = "medical record", description = "CRUD operations about medical records")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -62,7 +66,7 @@ public class MedicalRecordController {
             @Parameter(description = "Medical record object that needs to be added.")
             @RequestBody @Validated({Default.class, Create.class}) MedicalRecord body
     ) {
-        return toResponse(() -> medicalRecordService.createMedicalRecord(body));
+        return toResponse(medicalRecordService.createMedicalRecord(body));
     }
 
     @Operation(
@@ -76,7 +80,7 @@ public class MedicalRecordController {
             @Parameter(description = "New medical record object.")
             @RequestBody @Validated({Default.class, Update.class}) MedicalRecord body
     ) {
-        return toResponse(() -> medicalRecordService.updateMedicalRecord(id, body));
+        return toResponse(medicalRecordService.updateMedicalRecord(id, body));
     }
 
     @Operation(
@@ -92,7 +96,7 @@ public class MedicalRecordController {
             @Parameter(description = "New medical record object.")
             @RequestBody @Validated({Default.class, Update.class}) MedicalRecord body
     ) {
-        return toResponse(() -> medicalRecordService.updateMedicalRecordByNames(firstName, lastName, body));
+        return toResponse(medicalRecordService.updateMedicalRecordByNames(firstName, lastName, body));
     }
 
     @Operation(
@@ -131,17 +135,7 @@ public class MedicalRecordController {
         }
     }
 
-    private ResponseEntity<Void> toResponse(UpdateFunction fct) {
-        MedicalRecordService.UpdateResult res;
-        try {
-            res = fct.call();
-        } catch (MedicalRecordService.InterferingNamesException e) {
-            throw new ApiException(errorInterferingNames());
-        } catch (MedicalRecordService.PersonNotFoundException e) {
-            throw new ApiException(errorPersonNotFound());
-        } catch (MedicalRecordService.MedicalRecordExistsException e) {
-            throw new ApiException(errorMedicalRecordExists());
-        }
+    private ResponseEntity<Void> toResponse(MedicalRecordService.UpdateResult res) {
         if (res == null) {
             throw new ApiException(errorMedicalRecordNotFound());
         }
@@ -152,13 +146,6 @@ public class MedicalRecordController {
         }
     }
 
-    private interface UpdateFunction {
-        MedicalRecordService.UpdateResult call() throws
-                MedicalRecordService.InterferingNamesException,
-                MedicalRecordService.PersonNotFoundException,
-                MedicalRecordService.MedicalRecordExistsException;
-    }
-
     /**
      * Returns the URL to a medical record.
      */
@@ -166,16 +153,22 @@ public class MedicalRecordController {
         return UriUtil.createUri("/medicalRecord/" + medicalRecord.getPersonId());
     }
 
-    /**
-     * Returns a SERVICE/ALREADY_EXISTS error when a medical record already exists for a person.
-     */
-    static ApiError errorMedicalRecordExists() {
-        return ApiError.builder()
-                .type(ApiError.ErrorType.SERVICE)
-                .status(HttpStatus.CONFLICT.value())
-                .code(ApiErrorCode.ALREADY_EXISTS)
-                .message("A medical record already exists for this person")
-                .build();
+    @ExceptionHandler(MedicalRecordService.MedicalRecordExistsException.class)
+    @ResponseBody
+    public ResponseEntity<ApiError> handleMedicalRecordExistsException() {
+        return errorToResponse(errorMedicalRecordExists());
+    }
+
+    @ExceptionHandler(MedicalRecordService.PersonNotFoundException.class)
+    @ResponseBody
+    public ResponseEntity<ApiError> handlePersonNotFoundException() {
+        return errorToResponse(errorPersonNotFound());
+    }
+
+    @ExceptionHandler(MedicalRecordService.InterferingNamesException.class)
+    @ResponseBody
+    public ResponseEntity<ApiError> handleInterferingNamesException() {
+        return errorToResponse(errorInterferingNames());
     }
 
     /**
@@ -187,6 +180,18 @@ public class MedicalRecordController {
                 .status(HttpStatus.NOT_FOUND.value())
                 .code(ApiErrorCode.NOT_FOUND)
                 .message("Medical record not found")
+                .build();
+    }
+
+    /**
+     * Returns a SERVICE/ALREADY_EXISTS error when a medical record already exists for a person.
+     */
+    static ApiError errorMedicalRecordExists() {
+        return ApiError.builder()
+                .type(ApiError.ErrorType.SERVICE)
+                .status(HttpStatus.CONFLICT.value())
+                .code(ApiErrorCode.ALREADY_EXISTS)
+                .message("A medical record already exists for this person")
                 .build();
     }
 

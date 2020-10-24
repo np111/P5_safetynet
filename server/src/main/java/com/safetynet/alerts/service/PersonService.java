@@ -7,6 +7,7 @@ import com.safetynet.alerts.repository.entity.AddressEntity;
 import com.safetynet.alerts.repository.entity.PersonEntity;
 import com.safetynet.alerts.repository.mapper.PersonMapper;
 import com.safetynet.alerts.util.exception.FastException;
+import com.safetynet.alerts.util.exception.FastRuntimeException;
 import java.util.Objects;
 import lombok.Getter;
 import lombok.NonNull;
@@ -44,14 +45,9 @@ public class PersonService {
      * @throws InterferingAddressException if a matching address already exists with a different city/zip combination
      */
     @Transactional
-    public UpdateResult createPerson(Person body, boolean allowSimilarNames)
-            throws PersonExistsException, InterferingAddressException {
+    public UpdateResult createPerson(Person body, boolean allowSimilarNames) {
         body.setId(null);
-        try {
-            return update(null, body, allowSimilarNames, true);
-        } catch (ImmutableNamesException e) {
-            throw new RuntimeException("unreachable", e);
-        }
+        return update(null, body, allowSimilarNames, true);
     }
 
     /**
@@ -65,18 +61,13 @@ public class PersonService {
      * @throws InterferingAddressException if a matching address already exists with a different city/zip combination
      */
     @Transactional
-    public UpdateResult updatePerson(long id, Person body, boolean allowSimilarNames)
-            throws PersonExistsException, InterferingAddressException {
+    public UpdateResult updatePerson(long id, Person body, boolean allowSimilarNames) {
         body.setId(id);
         PersonEntity personEntity = personRepository.findById(id).orElse(null);
         if (personEntity == null) {
             return null;
         }
-        try {
-            return update(personEntity, body, allowSimilarNames, true);
-        } catch (ImmutableNamesException e) {
-            throw new RuntimeException("unreachable", e);
-        }
+        return update(personEntity, body, allowSimilarNames, true);
     }
 
     /**
@@ -92,8 +83,7 @@ public class PersonService {
      * @throws ImmutableNamesException     if you try to update firstName or lastName
      */
     @Transactional
-    public UpdateResult updatePersonByNames(String firstName, String lastName, Person body)
-            throws InterferingNamesException, PersonExistsException, InterferingAddressException, ImmutableNamesException {
+    public UpdateResult updatePersonByNames(String firstName, String lastName, Person body) {
         UpdateResult res = null;
         for (PersonEntity personEntity : personRepository.findAllByFirstNameAndLastName(firstName, lastName)) {
             if (res != null) {
@@ -124,7 +114,7 @@ public class PersonService {
      * @throws InterferingNamesException if more than one person has this names combination
      */
     @Transactional
-    public boolean deletePersonByNames(String firstName, String lastName) throws InterferingNamesException {
+    public boolean deletePersonByNames(String firstName, String lastName) {
         long count = personRepository.removeByFirstNameAndLastName(firstName, lastName);
         if (count == 0) {
             return false;
@@ -144,9 +134,7 @@ public class PersonService {
      * @param allowUpdateNames  whether or not names updates are allowed
      * @return the result
      */
-    private UpdateResult update(PersonEntity entity, Person body, boolean allowSimilarNames,
-            boolean allowUpdateNames)
-            throws ImmutableNamesException, InterferingAddressException, PersonExistsException {
+    private UpdateResult update(PersonEntity entity, Person body, boolean allowSimilarNames, boolean allowUpdateNames) {
         // prevent similar names combination if it was not allowed
         boolean create = (entity == null);
         if (create && !allowSimilarNames && personRepository
@@ -199,15 +187,15 @@ public class PersonService {
         private final @NonNull Person person;
     }
 
-    public static class PersonExistsException extends FastException {
+    public static class PersonExistsException extends FastRuntimeException {
     }
 
-    public static class ImmutableNamesException extends FastException {
+    public static class ImmutableNamesException extends FastRuntimeException {
     }
 
-    public static class InterferingNamesException extends FastException {
+    public static class InterferingNamesException extends FastRuntimeException {
     }
 
-    public static class InterferingAddressException extends FastException {
+    public static class InterferingAddressException extends FastRuntimeException {
     }
 }

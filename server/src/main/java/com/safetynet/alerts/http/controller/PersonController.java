@@ -21,12 +21,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import static com.safetynet.alerts.http.controller.ExceptionController.errorToResponse;
 
 @Tag(name = "person", description = "CRUD operations about persons")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -63,7 +67,7 @@ public class PersonController {
             @Parameter(description = "Person object that needs to be added.")
             @RequestBody @Validated({Default.class, Create.class}) Person body
     ) {
-        return toResponse(() -> personService.createPerson(body, allowSimilarNames));
+        return toResponse(personService.createPerson(body, allowSimilarNames));
     }
 
     @Operation(
@@ -79,7 +83,7 @@ public class PersonController {
             @Parameter(description = "New person object.")
             @RequestBody @Validated({Default.class, Update.class}) Person body
     ) {
-        return toResponse(() -> personService.updatePerson(id, body, allowSimilarNames));
+        return toResponse(personService.updatePerson(id, body, allowSimilarNames));
     }
 
     @Operation(
@@ -95,7 +99,7 @@ public class PersonController {
             @Parameter(description = "New person object.")
             @RequestBody @Validated({Default.class, Update.class}) Person body
     ) {
-        return toResponse(() -> personService.updatePersonByNames(firstName, lastName, body));
+        return toResponse(personService.updatePersonByNames(firstName, lastName, body));
     }
 
     @Operation(
@@ -124,29 +128,13 @@ public class PersonController {
             @Parameter(description = "Last name of person that needs to be deleted.")
             @RequestParam("lastName") @NotNull @IsName String lastName
     ) {
-        try {
-            if (!personService.deletePersonByNames(firstName, lastName)) {
-                throw new ApiException(errorPersonNotFound());
-            }
-            return ResponseEntity.noContent().build();
-        } catch (PersonService.InterferingNamesException e) {
-            throw new ApiException(errorInterferingNames());
+        if (!personService.deletePersonByNames(firstName, lastName)) {
+            throw new ApiException(errorPersonNotFound());
         }
+        return ResponseEntity.noContent().build();
     }
 
-    private ResponseEntity<Void> toResponse(UpdateFunction fct) {
-        PersonService.UpdateResult res;
-        try {
-            res = fct.call();
-        } catch (PersonService.InterferingNamesException e) {
-            throw new ApiException(errorInterferingNames());
-        } catch (PersonService.PersonExistsException e) {
-            throw new ApiException(errorPersonExists());
-        } catch (PersonService.InterferingAddressException e) {
-            throw new ApiException(errorInterferingAddress());
-        } catch (PersonService.ImmutableNamesException e) {
-            throw new ApiException(errorImmutableNames());
-        }
+    private ResponseEntity<Void> toResponse(PersonService.UpdateResult res) {
         if (res == null) {
             throw new ApiException(errorPersonNotFound());
         }
@@ -157,14 +145,6 @@ public class PersonController {
         }
     }
 
-    private interface UpdateFunction {
-        PersonService.UpdateResult call() throws
-                PersonService.InterferingNamesException,
-                PersonService.PersonExistsException,
-                PersonService.InterferingAddressException,
-                PersonService.ImmutableNamesException;
-    }
-
     /**
      * Returns the URL to a person.
      */
@@ -172,15 +152,39 @@ public class PersonController {
         return UriUtil.createUri("/person/" + person.getId());
     }
 
+    @ExceptionHandler(PersonService.PersonExistsException.class)
+    @ResponseBody
+    public ResponseEntity<ApiError> handlePersonExistsException() {
+        return errorToResponse(errorPersonExists());
+    }
+
+    @ExceptionHandler(PersonService.ImmutableNamesException.class)
+    @ResponseBody
+    public ResponseEntity<ApiError> handleImmutableNamesException() {
+        return errorToResponse(errorImmutableNames());
+    }
+
+    @ExceptionHandler(PersonService.InterferingNamesException.class)
+    @ResponseBody
+    public ResponseEntity<ApiError> handleInterferingNamesException() {
+        return errorToResponse(errorInterferingNames());
+    }
+
+    @ExceptionHandler(PersonService.InterferingAddressException.class)
+    @ResponseBody
+    public ResponseEntity<ApiError> handleInterferingAddressException() {
+        return errorToResponse(errorInterferingAddress());
+    }
+
     /**
-     * Returns a CLIENT/BAD_REQUEST error when firstName and lastName cannot be updated.
+     * Returns a SERVICE/NOT_FOUND error when a person does not exists.
      */
-    static ApiError errorImmutableNames() {
+    static ApiError errorPersonNotFound() {
         return ApiError.builder()
-                .type(ApiError.ErrorType.CLIENT)
-                .status(HttpStatus.BAD_REQUEST.value())
-                .code(ApiErrorCode.BAD_REQUEST)
-                .message("firstName and lastName cannot be updated in this context, use ID instead")
+                .type(ApiError.ErrorType.SERVICE)
+                .status(HttpStatus.NOT_FOUND.value())
+                .code(ApiErrorCode.NOT_FOUND)
+                .message("Person not found")
                 .build();
     }
 
@@ -197,14 +201,14 @@ public class PersonController {
     }
 
     /**
-     * Returns a SERVICE/NOT_FOUND error when a person does not exists.
+     * Returns a CLIENT/BAD_REQUEST error when firstName and lastName cannot be updated.
      */
-    static ApiError errorPersonNotFound() {
+    static ApiError errorImmutableNames() {
         return ApiError.builder()
-                .type(ApiError.ErrorType.SERVICE)
-                .status(HttpStatus.NOT_FOUND.value())
-                .code(ApiErrorCode.NOT_FOUND)
-                .message("Person not found")
+                .type(ApiError.ErrorType.CLIENT)
+                .status(HttpStatus.BAD_REQUEST.value())
+                .code(ApiErrorCode.BAD_REQUEST)
+                .message("firstName and lastName cannot be updated in this context, use ID instead")
                 .build();
     }
 

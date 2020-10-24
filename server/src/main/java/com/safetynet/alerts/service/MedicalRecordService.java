@@ -7,6 +7,7 @@ import com.safetynet.alerts.repository.entity.MedicalRecordEntity;
 import com.safetynet.alerts.repository.entity.PersonEntity;
 import com.safetynet.alerts.repository.mapper.MedicalRecordMapper;
 import com.safetynet.alerts.util.exception.FastException;
+import com.safetynet.alerts.util.exception.FastRuntimeException;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -43,8 +44,7 @@ public class MedicalRecordService {
      * @throws MedicalRecordExistsException if a medical record already exists for this person
      */
     @Transactional
-    public UpdateResult createMedicalRecord(MedicalRecord body)
-            throws InterferingNamesException, PersonNotFoundException, MedicalRecordExistsException {
+    public UpdateResult createMedicalRecord(MedicalRecord body) {
         body.setPersonId(null);
         return update(null, body);
     }
@@ -55,13 +55,9 @@ public class MedicalRecordService {
      * @param id   ID of the medical record to update
      * @param body data (personId is ignored)
      * @return the updated medical record
-     * @throws InterferingNamesException    if more than one person matches this medical record
-     * @throws PersonNotFoundException      if no person matches this medical record
-     * @throws MedicalRecordExistsException if a medical record already exists for this person
      */
     @Transactional
-    public UpdateResult updateMedicalRecord(long id, MedicalRecord body)
-            throws InterferingNamesException, PersonNotFoundException, MedicalRecordExistsException {
+    public UpdateResult updateMedicalRecord(long id, MedicalRecord body) {
         body.setPersonId(id);
         MedicalRecordEntity medicalRecordEntity = medicalRecordRepository.findById(id).orElse(null);
         if (medicalRecordEntity == null) {
@@ -77,13 +73,10 @@ public class MedicalRecordService {
      * @param lastName  Last name of the person to update
      * @param body      data (personId is ignored)
      * @return the updated medical record; or {@code null} if none has the given names
-     * @throws InterferingNamesException    if more than one person matches this medical record
-     * @throws PersonNotFoundException      if no person matches this medical record
-     * @throws MedicalRecordExistsException if a medical record already exists for this person
+     * @throws InterferingNamesException if more than one person matches this medical record
      */
     @Transactional
-    public UpdateResult updateMedicalRecordByNames(String firstName, String lastName, MedicalRecord body)
-            throws InterferingNamesException, MedicalRecordExistsException, PersonNotFoundException {
+    public UpdateResult updateMedicalRecordByNames(String firstName, String lastName, MedicalRecord body) {
         UpdateResult res = null;
         for (MedicalRecordEntity medicalRecordEntity : medicalRecordRepository
                 .findAllByPersonFirstNameAndPersonLastName(firstName, lastName)) {
@@ -115,7 +108,7 @@ public class MedicalRecordService {
      * @throws InterferingNamesException if more than one person has this names combination
      */
     @Transactional
-    public boolean deleteMedicalRecordByNames(String firstName, String lastName) throws InterferingNamesException {
+    public boolean deleteMedicalRecordByNames(String firstName, String lastName) {
         long count = medicalRecordRepository.removeByPersonFirstNameAndPersonLastName(firstName, lastName);
         if (count == 0) {
             return false;
@@ -133,8 +126,7 @@ public class MedicalRecordService {
      * @param body   the medical record model to apply
      * @return the result
      */
-    private UpdateResult update(MedicalRecordEntity entity, MedicalRecord body)
-            throws InterferingNamesException, PersonNotFoundException, MedicalRecordExistsException {
+    private UpdateResult update(MedicalRecordEntity entity, MedicalRecord body) {
         boolean create = (entity == null);
 
         // create or update the medical record
@@ -190,12 +182,12 @@ public class MedicalRecordService {
         private final @NonNull MedicalRecord medicalRecord;
     }
 
-    public static class MedicalRecordExistsException extends FastException {
+    public static class MedicalRecordExistsException extends FastRuntimeException {
     }
 
-    public static class PersonNotFoundException extends FastException {
+    public static class PersonNotFoundException extends FastRuntimeException {
     }
 
-    public static class InterferingNamesException extends FastException {
+    public static class InterferingNamesException extends FastRuntimeException {
     }
 }

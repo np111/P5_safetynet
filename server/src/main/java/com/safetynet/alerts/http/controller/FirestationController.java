@@ -22,12 +22,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriUtils;
+
+import static com.safetynet.alerts.http.controller.ExceptionController.errorToResponse;
 
 @Tag(name = "firestation", description = "CRUD operations about firestations")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -62,8 +67,7 @@ public class FirestationController {
             @Parameter(description = "Firestation object that needs to be added.")
             @RequestBody @Validated({Default.class, Create.class}) Firestation body
     ) {
-        FirestationService.UpdateResult res = firestationService.createFirestation(body);
-        return toResponse(res);
+        return toResponse(firestationService.createFirestation(body));
     }
 
     @Operation(
@@ -77,12 +81,7 @@ public class FirestationController {
             @Parameter(description = "New firestation object.")
             @RequestBody @Validated({Default.class, Update.class}) Firestation body
     ) {
-        try {
-            FirestationService.UpdateResult res = firestationService.updateFirestation(address, body);
-            return toResponse(res);
-        } catch (FirestationService.ImmutableAddressException e) {
-            throw new ApiException(errorImmutableAddress());
-        }
+        return toResponse(firestationService.updateFirestation(address, body));
     }
 
     @Operation(
@@ -100,6 +99,11 @@ public class FirestationController {
         return ResponseEntity.noContent().build();
     }
 
+    @ExceptionHandler(FirestationService.ImmutableAddressException.class)
+    @ResponseBody
+    public ResponseEntity<ApiError> handleImmutableAddressException() {
+        return errorToResponse(errorImmutableAddress());
+    }
 
     private ResponseEntity<Void> toResponse(FirestationService.UpdateResult res) {
         if (res.isCreated()) {
@@ -118,18 +122,6 @@ public class FirestationController {
     }
 
     /**
-     * Returns a CLIENT/BAD_REQUEST error when an address cannot be updated.
-     */
-    static ApiError errorImmutableAddress() {
-        return ApiError.builder()
-                .type(ApiError.ErrorType.CLIENT)
-                .status(HttpStatus.BAD_REQUEST.value())
-                .code(ApiErrorCode.BAD_REQUEST)
-                .message("address cannot be updated")
-                .build();
-    }
-
-    /**
      * Returns a SERVICE/NOT_FOUND error when a firestation does not exists.
      */
     static ApiError errorFirestationNotFound() {
@@ -138,6 +130,18 @@ public class FirestationController {
                 .status(HttpStatus.NOT_FOUND.value())
                 .code(ApiErrorCode.NOT_FOUND)
                 .message("address not found")
+                .build();
+    }
+
+    /**
+     * Returns a CLIENT/BAD_REQUEST error when an address cannot be updated.
+     */
+    static ApiError errorImmutableAddress() {
+        return ApiError.builder()
+                .type(ApiError.ErrorType.CLIENT)
+                .status(HttpStatus.BAD_REQUEST.value())
+                .code(ApiErrorCode.BAD_REQUEST)
+                .message("address cannot be updated")
                 .build();
     }
 }

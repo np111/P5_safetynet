@@ -4,7 +4,7 @@ import com.safetynet.alerts.api.model.Firestation;
 import com.safetynet.alerts.repository.AddressRepository;
 import com.safetynet.alerts.repository.entity.AddressEntity;
 import com.safetynet.alerts.repository.mapper.AddressMapper;
-import com.safetynet.alerts.util.exception.FastException;
+import com.safetynet.alerts.util.exception.FastRuntimeException;
 import java.util.Objects;
 import lombok.Getter;
 import lombok.NonNull;
@@ -40,11 +40,7 @@ public class FirestationService {
     @Transactional
     public UpdateResult createFirestation(Firestation body) {
         AddressEntity addressEntity = addressRepository.findByAddress(body.getAddress()).orElse(null);
-        try {
-            return update(addressEntity, body);
-        } catch (ImmutableAddressException e) {
-            throw new RuntimeException("unreachable", e);
-        }
+        return update(addressEntity, body);
     }
 
     /**
@@ -56,7 +52,7 @@ public class FirestationService {
      * @throws ImmutableAddressException if you try to update address
      */
     @Transactional
-    public UpdateResult updateFirestation(String address, Firestation body) throws ImmutableAddressException {
+    public UpdateResult updateFirestation(String address, Firestation body) {
         AddressEntity addressEntity = addressRepository.findByAddress(address).orElse(null);
         return update(addressEntity, body);
     }
@@ -84,8 +80,9 @@ public class FirestationService {
      * @param entity the existing entity; or {@code null} to create one
      * @param body   the firestation model to apply
      * @return the result
+     * @throws ImmutableAddressException if you try to update address
      */
-    private UpdateResult update(AddressEntity entity, Firestation body) throws ImmutableAddressException {
+    private UpdateResult update(AddressEntity entity, Firestation body) {
         boolean create = (entity == null);
 
         // create or update the address record
@@ -110,6 +107,6 @@ public class FirestationService {
         private final @NonNull Firestation firestation;
     }
 
-    public static class ImmutableAddressException extends FastException {
+    public static class ImmutableAddressException extends FastRuntimeException {
     }
 }

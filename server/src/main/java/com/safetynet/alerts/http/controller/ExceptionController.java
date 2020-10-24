@@ -42,7 +42,7 @@ public class ExceptionController {
     @ExceptionHandler(ApiException.class)
     @ResponseBody
     public ResponseEntity<ApiError> handleApiException(ApiException e, HttpServletRequest req) {
-        return toResponse(e.getError());
+        return errorToResponse(e.getError());
     }
 
     /**
@@ -55,16 +55,16 @@ public class ExceptionController {
     public ResponseEntity<ApiError> handleHttpMessageNotReadableException(HttpMessageNotReadableException e,
             HttpServletRequest req) {
         if (e.getMessage() != null && e.getMessage().startsWith("Required request body is missing")) {
-            return toResponse(errorValidationFailed("is required", "body", null, null));
+            return errorToResponse(errorValidationFailed("is required", "body", null, null));
         }
         if (e.getCause() instanceof InvalidFormatException) {
             InvalidFormatException ex = (InvalidFormatException) e.getCause();
             String parameter = ex.getPath().stream().map(Reference::getFieldName).collect(Collectors.joining("."));
             Map<String, Object> attributes = new LinkedHashMap<>();
             attributes.put("parserMessage", ex.getOriginalMessage());
-            return toResponse(errorValidationFailed("is badly formatted", parameter, null, attributes));
+            return errorToResponse(errorValidationFailed("is badly formatted", parameter, null, attributes));
         }
-        return toResponse(errorBadRequest(e.getMessage()));
+        return errorToResponse(errorBadRequest(e.getMessage()));
     }
 
     /**
@@ -76,7 +76,7 @@ public class ExceptionController {
     @ResponseBody
     public ResponseEntity<ApiError> handleNoHandlerFoundException(NoHandlerFoundException e,
             HttpServletRequest req) {
-        return toResponse(errorBadRequest(e.getMessage()));
+        return errorToResponse(errorBadRequest(e.getMessage()));
     }
 
     /**
@@ -88,7 +88,7 @@ public class ExceptionController {
             HttpServletRequest req) {
         String message = "is required";
         String parameter = e.getParameterName();
-        return toResponse(errorValidationFailed(message, parameter, null, null));
+        return errorToResponse(errorValidationFailed(message, parameter, null, null));
     }
 
     /**
@@ -100,7 +100,7 @@ public class ExceptionController {
             HttpServletRequest req) {
         String message = "must be a " + e.getParameter().getParameterType().getSimpleName();
         String parameter = e.getName();
-        return toResponse(errorValidationFailed(message, parameter, null, null));
+        return errorToResponse(errorValidationFailed(message, parameter, null, null));
     }
 
     /**
@@ -119,7 +119,7 @@ public class ExceptionController {
                 .skip(1L).map(Path.Node::toString).collect(Collectors.joining("."));
         String constraint = fieldError.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName();
         Map<String, Object> attributes = fieldError.getConstraintDescriptor().getAttributes();
-        return toResponse(errorValidationFailed(message, parameter, constraint, attributes));
+        return errorToResponse(errorValidationFailed(message, parameter, constraint, attributes));
     }
 
     /**
@@ -140,7 +140,7 @@ public class ExceptionController {
             String parameter = fieldError.get().getField();
             String constraint = fieldError.get().getCode();
             // TODO: retrieves attributes
-            return toResponse(errorValidationFailed(message, parameter, constraint, null));
+            return errorToResponse(errorValidationFailed(message, parameter, constraint, null));
         }
 
         // Or handles the first misc error
@@ -148,7 +148,7 @@ public class ExceptionController {
         String message = objectError.getDefaultMessage();
         String constraint = objectError.getCode();
         // TODO: retrieves attributes
-        return toResponse(errorValidationFailed(message, null, constraint, null));
+        return errorToResponse(errorValidationFailed(message, null, constraint, null));
     }
 
     /**
@@ -160,7 +160,7 @@ public class ExceptionController {
     @ResponseBody
     public ResponseEntity<ApiError> handleOthersException(Exception e, HttpServletRequest req) {
         logger.error("Unhandled request exception:", e);
-        return toResponse(ApiError.builder()
+        return errorToResponse(ApiError.builder()
                 .type(ApiError.ErrorType.UNKNOWN)
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .code(ApiErrorCode.SERVER_EXCEPTION)
@@ -208,7 +208,7 @@ public class ExceptionController {
         return res.build();
     }
 
-    private ResponseEntity<ApiError> toResponse(ApiError error) {
+    static ResponseEntity<ApiError> errorToResponse(ApiError error) {
         return new ResponseEntity<>(error, HttpStatus.valueOf(error.getStatus()));
     }
 }
