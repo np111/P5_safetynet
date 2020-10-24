@@ -9,6 +9,7 @@ import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import java.lang.reflect.Method;
+import java.util.List;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.springdoc.core.SpringDocAnnotationsUtils;
@@ -37,14 +38,31 @@ public class SpringdocCustomizer implements OpenApiCustomiser, OperationCustomiz
 
     private void addValidationErrorResponses(Operation operation, HandlerMethod handlerMethod) {
         if (handlerMethod.getMethod().getDeclaringClass().isAnnotationPresent(Validated.class)) {
-            // TODO: Add details, exclude methods with not parameter or body
-            ApiError apiError = ApiError.builder()
-                    .type(ErrorType.CLIENT)
-                    .status(400)
-                    .code(VALIDATION_FAILED)
-                    .message("Validation failed")
-                    .build();
-            addApiErrorResponse(operation, apiError, null, null);
+            List<ConstraintsDescriptor.Description> constraints = ConstraintsDescriptor.describeParameters(handlerMethod.getMethod());
+            if (!constraints.isEmpty()) {
+                ApiError apiError = ApiError.builder()
+                        .type(ErrorType.CLIENT)
+                        .status(400)
+                        .code(VALIDATION_FAILED)
+                        .message("Validation failed")
+                        .build();
+                StringBuilder description = new StringBuilder();
+                description.append("A request parameter validation failed:");
+                constraintsToString(description, "", constraints);
+                addApiErrorResponse(operation, apiError, description.toString(), null);
+            }
+        }
+    }
+
+    private void constraintsToString(StringBuilder sb, String prefix, List<ConstraintsDescriptor.Description> descriptions) {
+        for (ConstraintsDescriptor.Description description : descriptions) {
+            sb.append("\n").append(prefix).append("- *").append(description.getName()).append("*:");
+            int i = 0;
+            for (String constraint : description.getConstraints()) {
+                sb.append(++i == 1 ? " " : ", ");
+                sb.append(constraint);
+            }
+            constraintsToString(sb, prefix + "  ", description.getFields());
         }
     }
 
