@@ -10,6 +10,7 @@ import com.safetynet.alerts.util.ApiErrorCode;
 import com.safetynet.alerts.util.ApiException;
 import com.safetynet.alerts.util.UriUtil;
 import com.safetynet.alerts.util.spring.JsonRequestMapping;
+import com.safetynet.alerts.util.springdoc.ApiErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -44,7 +45,7 @@ public class MedicalRecordController {
             summary = "Find medical record by ID."
             // TODO: documentation to explain that same ID is shared by a person and it's medical record
     )
-    // TODO: Add errors documentation
+    @ApiErrorResponse(method = "errorMedicalRecordNotFound")
     @JsonRequestMapping(method = RequestMethod.GET, value = "/{personId}")
     public MedicalRecord getMedicalRecord(
             @Parameter(description = "ID of medical record to return.")
@@ -60,7 +61,9 @@ public class MedicalRecordController {
     @Operation(
             summary = "Add a new medical record."
     )
-    // TODO: Add errors documentation
+    @ApiErrorResponse(method = "errorInterferingNames")
+    @ApiErrorResponse(method = "errorPersonNotFound")
+    @ApiErrorResponse(method = "errorMedicalRecordExists")
     @JsonRequestMapping(method = RequestMethod.POST)
     public ResponseEntity<Void> createMedicalRecord(
             @Parameter(description = "Medical record object that needs to be added.")
@@ -72,7 +75,7 @@ public class MedicalRecordController {
     @Operation(
             summary = "Update an existing medical record."
     )
-    // TODO: Add errors documentation
+    @ApiErrorResponse(method = "errorMedicalRecordNotFound")
     @JsonRequestMapping(method = RequestMethod.PUT, value = "/{personId}")
     public ResponseEntity<Void> updateMedicalRecord(
             @Parameter(description = "ID of medical record that needs to be updated.")
@@ -86,7 +89,8 @@ public class MedicalRecordController {
     @Operation(
             summary = "Update an existing medical record by person first and last name."
     )
-    // TODO: Add errors documentation
+    @ApiErrorResponse(method = "errorMedicalRecordNotFound")
+    @ApiErrorResponse(method = "errorInterferingNames")
     @JsonRequestMapping(method = RequestMethod.PUT)
     public ResponseEntity<Void> updateMedicalRecordByNames(
             @Parameter(description = "First name of person whose medical record needs to be updated.")
@@ -102,7 +106,7 @@ public class MedicalRecordController {
     @Operation(
             summary = "Deletes a medical record."
     )
-    // TODO: Add errors documentation
+    @ApiErrorResponse(method = "errorMedicalRecordNotFound")
     @JsonRequestMapping(method = RequestMethod.DELETE, value = "/{personId}")
     public ResponseEntity<Void> deleteMedicalRecord(
             @Parameter(description = "ID of medical record that needs to be deleted.")
@@ -117,7 +121,8 @@ public class MedicalRecordController {
     @Operation(
             summary = "Deletes a medical record by person first and last name."
     )
-    // TODO: Add errors documentation
+    @ApiErrorResponse(method = "errorMedicalRecordNotFound")
+    @ApiErrorResponse(method = "errorInterferingNames")
     @JsonRequestMapping(method = RequestMethod.DELETE)
     public ResponseEntity<Void> deleteMedicalRecordByNames(
             @Parameter(description = "First name of person whose medical record needs to be deleted.")
@@ -125,14 +130,10 @@ public class MedicalRecordController {
             @Parameter(description = "Last name of person whose medical record needs to be deleted.")
             @RequestParam("lastName") @NotNull @IsName String lastName
     ) {
-        try {
-            if (!medicalRecordService.deleteMedicalRecordByNames(firstName, lastName)) {
-                throw new ApiException(errorMedicalRecordNotFound());
-            }
-            return ResponseEntity.noContent().build();
-        } catch (MedicalRecordService.InterferingNamesException e) {
-            throw new ApiException(errorInterferingNames());
+        if (!medicalRecordService.deleteMedicalRecordByNames(firstName, lastName)) {
+            throw new ApiException(errorMedicalRecordNotFound());
         }
+        return ResponseEntity.noContent().build();
     }
 
     private ResponseEntity<Void> toResponse(MedicalRecordService.UpdateResult res) {
@@ -203,7 +204,7 @@ public class MedicalRecordController {
                 .type(ApiError.ErrorType.SERVICE)
                 .status(HttpStatus.NOT_FOUND.value())
                 .code(ApiErrorCode.NOT_FOUND)
-                .message("The person linked to this medical file cannot be found")
+                .message("The person linked to this medical record cannot be found")
                 .build();
     }
 

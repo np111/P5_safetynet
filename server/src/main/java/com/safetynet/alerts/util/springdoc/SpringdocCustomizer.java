@@ -44,7 +44,7 @@ public class SpringdocCustomizer implements OpenApiCustomiser, OperationCustomiz
                     .code(VALIDATION_FAILED)
                     .message("Validation failed")
                     .build();
-            addApiErrorResponse(operation, apiError, null);
+            addApiErrorResponse(operation, apiError, null, null);
         }
     }
 
@@ -74,10 +74,10 @@ public class SpringdocCustomizer implements OpenApiCustomiser, OperationCustomiz
         if (!response.message().isEmpty()) {
             apiError.setMessage(response.message());
         }
-        addApiErrorResponse(operation, apiError, response.description());
+        addApiErrorResponse(operation, apiError, response.description(), response.condition());
     }
 
-    private void addApiErrorResponse(Operation operation, ApiError apiError, String description) {
+    private void addApiErrorResponse(Operation operation, ApiError apiError, String description, String condition) {
         String name = "" + apiError.getStatus();
         while (operation.getResponses().containsKey(name)) {
             name += "'";
@@ -87,8 +87,13 @@ public class SpringdocCustomizer implements OpenApiCustomiser, OperationCustomiz
             description = StringUtils.capitalize(StringUtils.defaultString(apiError.getMessage()));
         }
 
+        description = "`" + apiError.getType() + "`/`" + apiError.getCode() + "` - " + description;
+        if (condition != null && !condition.isEmpty()) {
+            description = "*if (" + condition + "):*\n>" + description.replace("\n", "\n>");
+        }
+
         operation.getResponses().addApiResponse(name, new ApiResponse()
-                .description(apiError.getType() + "/" + apiError.getCode() + " - " + description)
+                .description(description)
                 .content(new Content()
                         .addMediaType("*/*", new MediaType()
                                 .schema(new Schema<>().$ref("ApiError"))

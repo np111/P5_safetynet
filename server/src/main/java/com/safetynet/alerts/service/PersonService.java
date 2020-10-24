@@ -135,12 +135,7 @@ public class PersonService {
      * @return the result
      */
     private UpdateResult update(PersonEntity entity, Person body, boolean allowSimilarNames, boolean allowUpdateNames) {
-        // prevent similar names combination if it was not allowed
         boolean create = (entity == null);
-        if (create && !allowSimilarNames && personRepository
-                .existsByFirstNameAndLastName(body.getFirstName(), body.getLastName())) {
-            throw new PersonExistsException();
-        }
 
         // retrieve or create the address
         AddressEntity addressEntity = addressRepository.findByAddress(body.getAddress()).orElse(null);
@@ -160,16 +155,27 @@ public class PersonService {
         }
 
         // create or update the person
+        boolean namesUpdated;
         if (create) {
             entity = new PersonEntity();
             entity.setId(body.getId());
-        }
-        if (create || allowUpdateNames) {
             entity.setFirstName(body.getFirstName());
             entity.setLastName(body.getLastName());
+            namesUpdated = true;
         } else if (!Objects.equals(entity.getFirstName(), body.getFirstName())
                 || !Objects.equals(entity.getLastName(), body.getLastName())) {
-            throw new ImmutableNamesException();
+            if (!allowUpdateNames) {
+                throw new ImmutableNamesException();
+            }
+            entity.setFirstName(body.getFirstName());
+            entity.setLastName(body.getLastName());
+            namesUpdated = true;
+        } else {
+            namesUpdated = false;
+        }
+        if (namesUpdated && !allowSimilarNames && personRepository
+                .existsByFirstNameAndLastName(body.getFirstName(), body.getLastName())) {
+            throw new PersonExistsException();
         }
         entity.setAddress(addressEntity);
         entity.setPhone(body.getPhone());

@@ -10,6 +10,7 @@ import com.safetynet.alerts.util.ApiErrorCode;
 import com.safetynet.alerts.util.ApiException;
 import com.safetynet.alerts.util.UriUtil;
 import com.safetynet.alerts.util.spring.JsonRequestMapping;
+import com.safetynet.alerts.util.springdoc.ApiErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -43,7 +44,7 @@ public class PersonController {
     @Operation(
             summary = "Find person by ID."
     )
-    // TODO: Add errors documentation
+    @ApiErrorResponse(method = "errorPersonNotFound")
     @JsonRequestMapping(method = RequestMethod.GET, value = "/{id}")
     public Person getPerson(
             @Parameter(description = "ID of person to return.")
@@ -59,7 +60,8 @@ public class PersonController {
     @Operation(
             summary = "Add a new person."
     )
-    // TODO: Add errors documentation
+    @ApiErrorResponse(method = "errorPersonExists", condition = "allowSimilarNames == false")
+    @ApiErrorResponse(method = "errorInterferingAddress")
     @JsonRequestMapping(method = RequestMethod.POST)
     public ResponseEntity<Void> createPerson(
             @Parameter(description = "Allow creation of this new person even if another person has the same first and last name combination.")
@@ -73,7 +75,9 @@ public class PersonController {
     @Operation(
             summary = "Update an existing person."
     )
-    // TODO: Add errors documentation
+    @ApiErrorResponse(method = "errorPersonNotFound")
+    @ApiErrorResponse(method = "errorPersonExists", condition = "allowSimilarNames == false")
+    @ApiErrorResponse(method = "errorInterferingAddress")
     @JsonRequestMapping(method = RequestMethod.PUT, value = "/{id}")
     public ResponseEntity<Void> updatePerson(
             @Parameter(description = "ID of person that needs to be updated.")
@@ -89,7 +93,11 @@ public class PersonController {
     @Operation(
             summary = "Update an existing person by first and last name."
     )
-    // TODO: Add errors documentation
+    @ApiErrorResponse(method = "errorPersonNotFound")
+    @ApiErrorResponse(method = "errorInterferingNames")
+    @ApiErrorResponse(method = "errorPersonExists")
+    @ApiErrorResponse(method = "errorInterferingAddress")
+    @ApiErrorResponse(method = "errorImmutableNames")
     @JsonRequestMapping(method = RequestMethod.PUT)
     public ResponseEntity<Void> updatePersonByNames(
             @Parameter(description = "First name of person that needs to be updated.")
@@ -105,7 +113,7 @@ public class PersonController {
     @Operation(
             summary = "Deletes a person."
     )
-    // TODO: Add errors documentation
+    @ApiErrorResponse(method = "errorPersonNotFound")
     @JsonRequestMapping(method = RequestMethod.DELETE, value = "/{id}")
     public ResponseEntity<Void> deletePerson(
             @Parameter(description = "ID of person that needs to be deleted.")
@@ -120,7 +128,8 @@ public class PersonController {
     @Operation(
             summary = "Deletes a person by first and last name."
     )
-    // TODO: Add errors documentation
+    @ApiErrorResponse(method = "errorPersonNotFound")
+    @ApiErrorResponse(method = "errorInterferingNames")
     @JsonRequestMapping(method = RequestMethod.DELETE)
     public ResponseEntity<Void> deletePersonByNames(
             @Parameter(description = "First name of person that needs to be deleted.")

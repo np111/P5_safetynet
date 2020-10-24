@@ -13,6 +13,10 @@ import java.lang.annotation.Target;
 @Inherited
 @Repeatable(ApiErrorResponses.class)
 public @interface ApiErrorResponse {
+    String description() default "";
+
+    String condition() default "";
+
     ErrorType type() default ErrorType.UNKNOWN;
 
     int status() default 0;
@@ -20,8 +24,6 @@ public @interface ApiErrorResponse {
     String code() default "";
 
     String message() default "";
-
-    String description() default "";
 
     // TODO: metadata?
 
