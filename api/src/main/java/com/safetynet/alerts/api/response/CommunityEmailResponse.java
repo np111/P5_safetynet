@@ -11,8 +11,7 @@ import lombok.Singular;
 import lombok.SneakyThrows;
 
 /**
- * List of {@linkplain Person#getEmail()} email addresses} of {@linkplain Person persons} living in a given {@linkplain
- * Person#getCity()} city}.
+ * List of {@linkplain Person#getEmail()} email addresses} of {@linkplain Person persons} living in a given {@linkplain Person#getCity()} city}.
  */
 @lombok.Builder(builderClassName = "Builder")
 @NoArgsConstructor

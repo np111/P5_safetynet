@@ -1,9 +1,7 @@
 package com.safetynet.alerts.repository.entity;
 
-import com.safetynet.alerts.api.model.MedicalRecord;
 import com.safetynet.alerts.util.DateUtil;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;

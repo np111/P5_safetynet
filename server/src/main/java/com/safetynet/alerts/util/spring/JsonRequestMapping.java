@@ -9,8 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
- * An alias for the spring {@link RequestMapping} with {@link RequestMapping#consumes()} and {@link
- * RequestMapping#produces()} defined to {@code "application/json"}.
+ * An alias for the spring {@link RequestMapping} with {@link RequestMapping#consumes()} and {@link RequestMapping#produces()} defined to {@code "application/json"}.
  */
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)

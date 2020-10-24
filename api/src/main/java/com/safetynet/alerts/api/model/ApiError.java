@@ -48,14 +48,12 @@ public class ApiError {
      */
     public enum ErrorType {
         /**
-         * The error came from the client (eg.: invalid authorization, missing parameters) and the request could not be
-         * processed.
+         * The error came from the client (eg.: invalid authorization, missing parameters) and the request could not be processed.
          */
         CLIENT,
 
         /**
-         * The error comes from the service (eg.: a requested resource is missing) and must be handled by the client.
-         * Possible errors are documented for each endpoint.
+         * The error comes from the service (eg.: a requested resource is missing) and must be handled by the client. Possible errors are documented for each endpoint.
          */
         SERVICE,
 

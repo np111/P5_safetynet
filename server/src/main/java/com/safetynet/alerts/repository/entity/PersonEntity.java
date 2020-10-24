@@ -1,8 +1,5 @@
 package com.safetynet.alerts.repository.entity;
 
-import com.safetynet.alerts.api.model.Person;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;

@@ -14,7 +14,6 @@ import static com.safetynet.alerts.http.controller.PersonController.errorInterfe
 import static com.safetynet.alerts.http.controller.PersonController.errorInterferingNames;
 import static com.safetynet.alerts.http.controller.PersonController.errorPersonExists;
 import static com.safetynet.alerts.http.controller.PersonController.errorPersonNotFound;
-import static com.safetynet.alerts.http.controller.PersonServiceMock.interferingAddressPerson;
 import static com.safetynet.alerts.http.controller.PersonServiceMock.interferingAddressPersonJson;
 import static com.safetynet.alerts.http.controller.PersonServiceMock.invalidPersonFirstName;
 import static com.safetynet.alerts.http.controller.PersonServiceMock.invalidPersonId;

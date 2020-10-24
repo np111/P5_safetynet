@@ -12,8 +12,7 @@ import lombok.Singular;
 import lombok.SneakyThrows;
 
 /**
- * List of {@linkplain Person persons} living in a given {@linkplain Person#getAddress()} address} with the number of
- * the firestation covering them.
+ * List of {@linkplain Person persons} living in a given {@linkplain Person#getAddress()} address} with the number of the firestation covering them.
  */
 @Builder(builderClassName = "Builder")
 @NoArgsConstructor

@@ -1,7 +1,6 @@
 package com.safetynet.alerts.repository;
 
 import com.safetynet.alerts.repository.entity.AddressEntity;
-import com.safetynet.alerts.repository.entity.PersonEntity;
 import java.util.Optional;
 import org.springframework.data.repository.CrudRepository;
 
