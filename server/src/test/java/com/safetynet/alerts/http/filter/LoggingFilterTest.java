@@ -21,6 +21,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class LoggingFilterTest {
@@ -93,6 +94,11 @@ class LoggingFilterTest {
                         .info("HTTP > 200 -")
                         .build(),
 
+                Context.builder().enabled(true).includePayloads(true).uri(URI).responseType("application/json; charset=invalid").responseBody(JSON_BODY)
+                        .info("HTTP < 127.0.0.1 GET \"" + URI + "\"")
+                        .info("HTTP > 200 - [unknown]")
+                        .build(),
+
                 // Non-200 responses
                 Context.builder().enabled(true).uri(URI).responseStatus(101)
                         .info("HTTP < 127.0.0.1 GET \"" + URI + "\"")
@@ -153,6 +159,7 @@ class LoggingFilterTest {
 
             assertNotNull(chain.getRequest(), "chain.doFilter must always be called");
             assertNotNull(chain.getResponse(), "chain.doFilter must always be called");
+            assertFalse(filter.shouldNotFilterAsyncDispatch(), "filter.shouldNotFilterAsyncDispatch() must always be false");
 
             assertEquals(ctx.getExceptedInfos(), filter.getInfos());
             assertEquals(ctx.getExceptedErrors(), filter.getErrors());
