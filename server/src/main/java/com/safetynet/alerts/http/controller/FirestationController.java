@@ -10,6 +10,7 @@ import com.safetynet.alerts.util.ApiErrorCode;
 import com.safetynet.alerts.util.ApiException;
 import com.safetynet.alerts.util.UriUtil;
 import com.safetynet.alerts.util.spring.JsonRequestMapping;
+import com.safetynet.alerts.util.springdoc.ApiErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -44,7 +45,7 @@ public class FirestationController {
     @Operation(
             summary = "Find firestation by address."
     )
-    // TODO: Add errors documentation
+    @ApiErrorResponse(method = "errorFirestationNotFound")
     @JsonRequestMapping(method = RequestMethod.GET, value = "/get")
     public Firestation getFirestation(
             @Parameter(description = "Address of firestation to return.")
@@ -60,7 +61,6 @@ public class FirestationController {
     @Operation(
             summary = "Add a new firestation."
     )
-    // TODO: Add errors documentation
     @JsonRequestMapping(method = RequestMethod.POST)
     public ResponseEntity<Void> createFirestation(
             @Parameter(description = "Firestation object that needs to be added.")
@@ -72,7 +72,7 @@ public class FirestationController {
     @Operation(
             summary = "Add or update a firestation."
     )
-    // TODO: Add errors documentation
+    @ApiErrorResponse(method = "errorImmutableAddress")
     @JsonRequestMapping(method = RequestMethod.PUT)
     public ResponseEntity<Void> updateFirestation(
             @Parameter(description = "Address of firestation that needs to be updated.")
@@ -86,7 +86,7 @@ public class FirestationController {
     @Operation(
             summary = "Deletes a firestation."
     )
-    // TODO: Add errors documentation
+    @ApiErrorResponse(method = "errorFirestationNotFound")
     @JsonRequestMapping(method = RequestMethod.DELETE)
     public ResponseEntity<Void> deleteFirestation(
             @Parameter(description = "Address of firestation that needs to be deleted.")
@@ -128,7 +128,7 @@ public class FirestationController {
                 .type(ApiError.ErrorType.SERVICE)
                 .status(HttpStatus.NOT_FOUND.value())
                 .code(ApiErrorCode.NOT_FOUND)
-                .message("address not found")
+                .message("Firestation not found")
                 .build();
     }
 
