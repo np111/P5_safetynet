@@ -2,12 +2,16 @@ package com.safetynet.alerts.util.springdoc;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.AnnotatedParameterizedType;
+import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.validation.Constraint;
 import javax.validation.Valid;
@@ -55,7 +59,7 @@ public class ConstraintsDescriptor {
             if (required) {
                 description.getConstraints().add("NotNull");
             }
-            describe(description, param.getType(), param, new Class[0]);
+            describe(description, param.getAnnotatedType(), param, new Class[0]);
             if (!description.isEmpty()) {
                 descriptions.add(description);
             }
@@ -64,7 +68,8 @@ public class ConstraintsDescriptor {
     }
 
     @SneakyThrows
-    private static void describe(Description dst, Class<?> type, AnnotatedElement annotations, Class<?>[] validationGroups) {
+    private static void describe(Description dst, AnnotatedType type, AnnotatedElement annotations, Class<?>[] validationGroups) {
+        // describe own constraints
         for (Annotation annotation : annotations.getAnnotations()) {
             if (AnnotationUtils.getAnnotation(annotation.annotationType(), Constraint.class) != null) {
                 Method groupsMethod = MethodUtils.getMatchingMethod(annotation.annotationType(), "groups");
@@ -75,6 +80,7 @@ public class ConstraintsDescriptor {
             }
         }
 
+        // describe validated fields constraints
         Class<?>[] fieldsValidationGroups = null;
         Validated validated = AnnotationUtils.getAnnotation(annotations, Validated.class);
         if (validated != null) {
@@ -83,9 +89,34 @@ public class ConstraintsDescriptor {
             fieldsValidationGroups = new Class[0];
         }
         if (fieldsValidationGroups != null) {
-            for (Field field : FieldUtils.getAllFields(type)) {
+            for (Field field : FieldUtils.getAllFields((Class<?>) type.getType())) {
                 Description description = new Description(field.getName());
-                describe(description, field.getType(), field, fieldsValidationGroups);
+                describe(description, field.getAnnotatedType(), field, fieldsValidationGroups);
+                if (!description.isEmpty()) {
+                    dst.getFields().add(description);
+                }
+            }
+        }
+
+        // describe generic constraints
+        if (type instanceof AnnotatedParameterizedType) {
+            AnnotatedParameterizedType parameterizedType = (AnnotatedParameterizedType) type;
+
+            Class<?> clazz = (Class<?>) ((ParameterizedType) parameterizedType.getType()).getRawType();
+            List<String> argumentsNames = new ArrayList<>();
+            if (List.class.isAssignableFrom(clazz)) {
+                argumentsNames.add("entry");
+            } else if (Map.class.isAssignableFrom(clazz)) {
+                argumentsNames.add("key");
+                argumentsNames.add("value");
+            }
+
+            AnnotatedType[] arguments = parameterizedType.getAnnotatedActualTypeArguments();
+            for (int i = 0; i < arguments.length; i++) {
+                AnnotatedType argument = arguments[i];
+                Description description = new Description(
+                        "[" + (i < argumentsNames.size() ? argumentsNames.get(i) : Integer.toString(i + 1)) + "]");
+                describe(description, argument, argument, validationGroups);
                 if (!description.isEmpty()) {
                     dst.getFields().add(description);
                 }

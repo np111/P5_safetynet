@@ -25,6 +25,7 @@ import static com.safetynet.alerts.util.ApiErrorCode.VALIDATION_FAILED;
 public class SpringdocCustomizer implements OpenApiCustomiser, OperationCustomizer {
     @Override
     public void customise(OpenAPI openAPI) {
+        // register ApiError schema (used by addApiErrorResponses)
         SpringDocAnnotationsUtils.resolveSchemaFromType(ApiError.class, openAPI.getComponents(), null);
     }
 
@@ -36,6 +37,9 @@ public class SpringdocCustomizer implements OpenApiCustomiser, OperationCustomiz
         return operation;
     }
 
+    /**
+     * Automatically add documentation of validation (constraints) errors.
+     */
     private void addValidationErrorResponses(Operation operation, HandlerMethod handlerMethod) {
         if (handlerMethod.getMethod().getDeclaringClass().isAnnotationPresent(Validated.class)) {
             List<ConstraintsDescriptor.Description> constraints = ConstraintsDescriptor.describeParameters(handlerMethod.getMethod());
@@ -66,6 +70,9 @@ public class SpringdocCustomizer implements OpenApiCustomiser, OperationCustomiz
         }
     }
 
+    /**
+     * Add service errors documentation from the {@link ApiErrorResponse} annotation.
+     */
     private void addApiErrorResponses(Operation operation, HandlerMethod handlerMethod) {
         ApiErrorResponse[] responses = handlerMethod.getMethod().getAnnotationsByType(ApiErrorResponse.class);
         for (ApiErrorResponse response : responses) {
@@ -125,6 +132,9 @@ public class SpringdocCustomizer implements OpenApiCustomiser, OperationCustomiz
         return (ApiError) method.invoke(null);
     }
 
+    /**
+     * Replace the default "* /*" content type by "application/json".
+     */
     private void setContentType(Operation operation) {
         operation.getResponses().values().forEach(response -> {
             Content content = response.getContent();
