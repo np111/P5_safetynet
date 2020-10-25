@@ -32,9 +32,12 @@ public class AlertsService {
     private final PersonRepository personRepository;
     private final PersonMapper personMapper;
 
-    @Transactional(readOnly = true)
     public PersonsCoveredByFirestationResponse getPersonsCoveredByFirestation(String stationNumber) {
-        ZonedDateTime now = ZonedDateTime.now();
+        return getPersonsCoveredByFirestation(stationNumber, ZonedDateTime.now());
+    }
+
+    @Transactional(readOnly = true)
+    public PersonsCoveredByFirestationResponse getPersonsCoveredByFirestation(String stationNumber, ZonedDateTime now) {
         PersonsCoveredByFirestationResponse.Builder res = PersonsCoveredByFirestationResponse.builder();
         int adultsCount = 0;
         int childrenCount = 0;
@@ -51,9 +54,12 @@ public class AlertsService {
         return res.adultsCount(adultsCount).childrenCount(childrenCount).build();
     }
 
-    @Transactional(readOnly = true)
     public ChildAlertResponse getChildAlert(String address) {
-        ZonedDateTime now = ZonedDateTime.now();
+        return getChildAlert(address, ZonedDateTime.now());
+    }
+
+    @Transactional(readOnly = true)
+    public ChildAlertResponse getChildAlert(String address, ZonedDateTime now) {
         ChildAlertResponse.Builder res = ChildAlertResponse.builder();
 
         for (PersonEntity personEntity : personRepository.findAllByAddressAddress(address)) {
@@ -78,9 +84,12 @@ public class AlertsService {
         return PhoneAlertResponse.builder().phones(phones).build();
     }
 
-    @Transactional(readOnly = true)
     public FireResponse getFire(String address) {
-        ZonedDateTime now = ZonedDateTime.now();
+        return getFire(address, ZonedDateTime.now());
+    }
+
+    @Transactional(readOnly = true)
+    public FireResponse getFire(String address, ZonedDateTime now) {
         FireResponse.Builder res = FireResponse.builder();
 
         addressRepository.findByAddress(address)
@@ -91,9 +100,12 @@ public class AlertsService {
         return res.build();
     }
 
-    @Transactional(readOnly = true)
     public FloodStationsResponse getFloodStations(List<String> stations) {
-        ZonedDateTime now = ZonedDateTime.now();
+        return getFloodStations(stations, ZonedDateTime.now());
+    }
+
+    @Transactional(readOnly = true)
+    public FloodStationsResponse getFloodStations(List<String> stations, ZonedDateTime now) {
         FloodStationsResponse.Builder res = FloodStationsResponse.builder();
 
         for (AddressEntity addressEntity : addressRepository.findAllByFirestationIn(stations)) {
@@ -110,9 +122,12 @@ public class AlertsService {
         return res.build();
     }
 
-    @Transactional(readOnly = true)
     public PersonInfoResponse getPersonInfo(String firstName, String lastName) {
-        ZonedDateTime now = ZonedDateTime.now();
+        return getPersonInfo(firstName, lastName, ZonedDateTime.now());
+    }
+
+    @Transactional(readOnly = true)
+    public PersonInfoResponse getPersonInfo(String firstName, String lastName, ZonedDateTime now) {
         PersonInfoResponse.Builder res = PersonInfoResponse.builder();
 
         for (PersonEntity personEntity : personRepository.findAllByFirstNameAndLastName(firstName, lastName)) {
