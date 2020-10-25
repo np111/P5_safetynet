@@ -69,7 +69,7 @@ public class PersonController {
             @Parameter(description = "Person object that needs to be added.")
             @RequestBody @Validated({Default.class, Create.class}) Person body
     ) {
-        return toResponse(personService.createPerson(body, allowSimilarNames));
+        return toResponse(true, personService.createPerson(body, allowSimilarNames));
     }
 
     @Operation(
@@ -87,7 +87,7 @@ public class PersonController {
             @Parameter(description = "New person object.")
             @RequestBody @Validated({Default.class, Update.class}) Person body
     ) {
-        return toResponse(personService.updatePerson(id, body, allowSimilarNames));
+        return toResponse(false, personService.updatePerson(id, body, allowSimilarNames));
     }
 
     @Operation(
@@ -107,7 +107,7 @@ public class PersonController {
             @Parameter(description = "New person object.")
             @RequestBody @Validated({Default.class, Update.class}) Person body
     ) {
-        return toResponse(personService.updatePersonByNames(firstName, lastName, body));
+        return toResponse(false, personService.updatePersonByNames(firstName, lastName, body));
     }
 
     @Operation(
@@ -143,14 +143,14 @@ public class PersonController {
         return ResponseEntity.noContent().build();
     }
 
-    private ResponseEntity<Void> toResponse(PersonService.UpdateResult res) {
-        if (res == null) {
+    private ResponseEntity<Void> toResponse(boolean created, Person person) {
+        if (person == null) {
             throw new ApiException(errorPersonNotFound());
         }
-        if (res.isCreated()) {
-            return ResponseEntity.created(getLocation(res.getPerson())).build();
+        if (created) {
+            return ResponseEntity.created(getLocation(person)).build();
         } else {
-            return ResponseEntity.noContent().location(getLocation(res.getPerson())).build();
+            return ResponseEntity.noContent().location(getLocation(person)).build();
         }
     }
 

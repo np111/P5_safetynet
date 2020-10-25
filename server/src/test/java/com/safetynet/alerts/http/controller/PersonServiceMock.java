@@ -20,7 +20,7 @@ public class PersonServiceMock {
         // CREATE
         // - Create a new person
         when(personService.createPerson(eq(unknownPerson()), anyBoolean()))
-                .thenReturn(new PersonService.UpdateResult(true, unknownPerson()));
+                .thenReturn(unknownPerson());
 
         // - Create an existing person (allowSimilarNames=false)
         when(personService.createPerson(knownPerson(), false))
@@ -28,7 +28,7 @@ public class PersonServiceMock {
 
         // - Create an existing person (allowSimilarNames=true)
         when(personService.createPerson(knownPerson(), true))
-                .thenReturn(new PersonService.UpdateResult(true, knownPerson()));
+                .thenReturn(knownPerson());
 
         // - Create a new person with an interfering address
         when(personService.createPerson(eq(interferingAddressPerson()), anyBoolean()))
@@ -37,7 +37,7 @@ public class PersonServiceMock {
         // UPDATE
         // - Update an existing person (without changing names)
         when(personService.updatePerson(eq(knownPerson().getId()), eq(knownPerson()), anyBoolean()))
-                .thenReturn(new PersonService.UpdateResult(false, knownPerson()));
+                .thenReturn(knownPerson());
 
         // - Update an existing person (changing names to matching names - allowSimilarNames=false)
         when(personService.updatePerson(knownPerson().getId(), manyPerson(), false))
@@ -45,7 +45,7 @@ public class PersonServiceMock {
 
         // - Update an existing person (changing names to matching names - allowSimilarNames=true)
         when(personService.updatePerson(knownPerson().getId(), manyPerson(), true))
-                .thenReturn(new PersonService.UpdateResult(false, manyPerson()));
+                .thenReturn(manyPerson());
 
         // - Update an existing person to an interfering address
         when(personService.updatePerson(eq(knownPerson().getId()), eq(interferingAddressPerson()), anyBoolean()))
@@ -54,7 +54,7 @@ public class PersonServiceMock {
         // UPDATE BY NAMES
         // - Update an existing person (without changing names)
         when(personService.updatePersonByNames(knownPerson().getFirstName(), knownPerson().getLastName(), knownPerson()))
-                .thenReturn(new PersonService.UpdateResult(false, knownPerson()));
+                .thenReturn(knownPerson());
 
         // - Update an existing person (changing names)
         when(personService.updatePersonByNames(knownPerson().getFirstName(), knownPerson().getLastName(), manyPerson()))

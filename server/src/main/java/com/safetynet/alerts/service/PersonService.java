@@ -8,8 +8,6 @@ import com.safetynet.alerts.repository.entity.PersonEntity;
 import com.safetynet.alerts.repository.mapper.PersonMapper;
 import com.safetynet.alerts.util.exception.FastRuntimeException;
 import java.util.Objects;
-import lombok.Getter;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -45,7 +43,7 @@ public class PersonService {
      * @throws InterferingAddressException if a matching address already exists with a different city/zip combination
      */
     @Transactional
-    public UpdateResult createPerson(Person body, boolean allowSimilarNames) {
+    public Person createPerson(Person body, boolean allowSimilarNames) {
         body.setId(null);
         return update(null, body, allowSimilarNames, true);
     }
@@ -61,7 +59,7 @@ public class PersonService {
      * @throws InterferingAddressException if a matching address already exists with a different city/zip combination
      */
     @Transactional
-    public UpdateResult updatePerson(long id, Person body, boolean allowSimilarNames) {
+    public Person updatePerson(long id, Person body, boolean allowSimilarNames) {
         body.setId(id);
         PersonEntity personEntity = personRepository.findById(id).orElse(null);
         if (personEntity == null) {
@@ -83,8 +81,8 @@ public class PersonService {
      * @throws ImmutableNamesException     if you try to update firstName or lastName
      */
     @Transactional
-    public UpdateResult updatePersonByNames(String firstName, String lastName, Person body) {
-        UpdateResult res = null;
+    public Person updatePersonByNames(String firstName, String lastName, Person body) {
+        Person res = null;
         for (PersonEntity personEntity : personRepository.findAllByFirstNameAndLastName(firstName, lastName)) {
             if (res != null) {
                 throw new InterferingNamesException();
@@ -134,7 +132,7 @@ public class PersonService {
      * @param allowUpdateNames  whether or not names updates are allowed
      * @return the result
      */
-    private UpdateResult update(PersonEntity entity, Person body, boolean allowSimilarNames, boolean allowUpdateNames) {
+    private Person update(PersonEntity entity, Person body, boolean allowSimilarNames, boolean allowUpdateNames) {
         boolean create = (entity == null);
 
         // retrieve or create the address
@@ -183,14 +181,7 @@ public class PersonService {
         personRepository.save(entity);
 
         // returns result
-        return new UpdateResult(create, personMapper.toPerson(entity));
-    }
-
-    @RequiredArgsConstructor
-    @Getter
-    public static class UpdateResult {
-        private final boolean created;
-        private final @NonNull Person person;
+        return personMapper.toPerson(entity);
     }
 
     public static class PersonExistsException extends FastRuntimeException {

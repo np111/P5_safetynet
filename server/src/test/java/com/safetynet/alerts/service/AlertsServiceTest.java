@@ -1,5 +1,6 @@
 package com.safetynet.alerts.service;
 
+import com.safetynet.alerts.PodamFactoryUtil;
 import com.safetynet.alerts.api.model.Person;
 import com.safetynet.alerts.api.response.ChildAlertResponse;
 import com.safetynet.alerts.api.response.CommunityEmailResponse;
@@ -49,7 +50,7 @@ class AlertsServiceTest {
 
     private AlertsService alertsService;
 
-    private final PodamFactory factory = new PodamFactoryImpl();
+    private final PodamFactory factory = PodamFactoryUtil.createPodamFactory();
 
     @BeforeEach
     void setup() {

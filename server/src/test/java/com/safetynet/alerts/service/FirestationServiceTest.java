@@ -1,5 +1,6 @@
 package com.safetynet.alerts.service;
 
+import com.safetynet.alerts.PodamFactoryUtil;
 import com.safetynet.alerts.api.model.Firestation;
 import com.safetynet.alerts.repository.AddressRepository;
 import com.safetynet.alerts.repository.entity.AddressEntity;
@@ -27,7 +28,7 @@ class FirestationServiceTest {
 
     private FirestationService firestationService;
 
-    private final PodamFactory factory = new PodamFactoryImpl();
+    private final PodamFactory factory = PodamFactoryUtil.createPodamFactory();
 
     @BeforeEach
     void setup() {
@@ -37,12 +38,16 @@ class FirestationServiceTest {
 
     @Test
     void getFirestation() {
-        getFirestation(true);
-        getFirestation(false);
+        getFirestation(true, true);
+        getFirestation(true, false);
+        getFirestation(false, false);
     }
 
-    private void getFirestation(boolean exists) {
+    private void getFirestation(boolean exists, boolean withFirestation) {
         AddressEntity address = exists ? factory.manufacturePojo(AddressEntity.class) : null;
+        if (exists && !withFirestation) {
+            address.setFirestation(null);
+        }
 
         when(addressRepository.findByAddress("1509 Culver St"))
                 .thenReturn(Optional.ofNullable(address));
