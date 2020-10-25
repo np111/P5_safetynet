@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Singular;
 import lombok.SneakyThrows;
 
 /**
@@ -18,6 +19,7 @@ import lombok.SneakyThrows;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Data
 public class PhoneAlertResponse implements Cloneable {
+    @Singular("phone")
     private List<String> phones;
 
     @SneakyThrows
