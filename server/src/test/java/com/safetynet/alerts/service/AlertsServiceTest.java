@@ -195,16 +195,19 @@ class AlertsServiceTest {
     void getFloodStations() {
         AddressEntity address1 = factory.manufacturePojo(AddressEntity.class);
         AddressEntity address2 = factory.manufacturePojo(AddressEntity.class);
+        AddressEntity address3 = factory.manufacturePojo(AddressEntity.class);
         PersonEntity person1 = factory.manufacturePojo(PersonEntity.class);
         PersonEntity person2 = factory.manufacturePojo(PersonEntity.class);
         PersonEntity person3 = factory.manufacturePojo(PersonEntity.class);
 
         when(addressRepository.findAllByFirestationIn(Arrays.asList("A1", "A2")))
-                .thenReturn(Arrays.asList(address1, address2));
+                .thenReturn(Arrays.asList(address1, address2, address3));
         when(personRepository.findAllByAddressAddress(address1.getAddress()))
                 .thenReturn(Arrays.asList(person1, person2));
         when(personRepository.findAllByAddressAddress(address2.getAddress()))
                 .thenReturn(Collections.singletonList(person3));
+        when(personRepository.findAllByAddressAddress(address3.getAddress()))
+                .thenReturn(Collections.emptyList());
 
         FloodStationsResponse res = alertsService.getFloodStations(Arrays.asList("A1", "A2"), now);
         assertEquals(FloodStationsResponse.builder()
