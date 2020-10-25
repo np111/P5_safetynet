@@ -131,6 +131,14 @@
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
         <version>${jacoco.version}</version>
+        <configuration>
+          <excludes>
+            <!-- exclude untestable exceptions utils from coverage -->
+            <exclude>**/com/safetynet/alerts/util/exception/Fast*</exclude>
+            <!-- exclude documentation utils -->
+            <exclude>**/com/safetynet/alerts/util/springdoc/*</exclude>
+          </excludes>
+        </configuration>
         <executions>
           <execution>
             <goals>
