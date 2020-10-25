@@ -6,6 +6,7 @@ import com.safetynet.alerts.repository.entity.AddressEntity;
 import com.safetynet.alerts.repository.mapper.AddressMapper;
 import com.safetynet.alerts.util.exception.FastRuntimeException;
 import java.util.Objects;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -102,7 +103,7 @@ public class FirestationService {
     }
 
     @RequiredArgsConstructor
-    @Getter
+    @Data
     public static class UpdateResult {
         private final boolean created;
         private final @NonNull Firestation firestation;
