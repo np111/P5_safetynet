@@ -13,6 +13,7 @@ import com.safetynet.alerts.repository.PersonRepository;
 import com.safetynet.alerts.repository.entity.AddressEntity;
 import com.safetynet.alerts.repository.entity.PersonEntity;
 import com.safetynet.alerts.repository.mapper.PersonMapper;
+import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -21,13 +22,18 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.api.PodamFactoryImpl;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
 class AlertsServiceTest {
@@ -77,6 +83,18 @@ class AlertsServiceTest {
     }
 
     @Test
+    void getPersonsCoveredByFirestationNow() {
+        AlertsService alertsServiceSpy = Mockito.spy(alertsService);
+        ZonedDateTime[] overloadedArg = new ZonedDateTime[1];
+        doAnswer(ctx -> {
+            overloadedArg[0] = ctx.getArgument(1);
+            return null;
+        }).when(alertsServiceSpy).getPersonsCoveredByFirestation(eq("A"), any(ZonedDateTime.class));
+        alertsServiceSpy.getPersonsCoveredByFirestation("A");
+        assertThat(Duration.between(ZonedDateTime.now(), overloadedArg[0]).abs()).isLessThan(Duration.ofSeconds(1));
+    }
+
+    @Test
     void getChildAlert() {
         PersonEntity child1 = factory.manufacturePojo(PersonEntity.class);
         child1.getMedicalRecord().setBirthdate(now.minusYears(5).toLocalDate());
@@ -97,6 +115,18 @@ class AlertsServiceTest {
                 .adult(personMapper.toCompletePerson(adult1, now))
                 .adult(personMapper.toCompletePerson(adult2, now))
                 .build(), res);
+    }
+
+    @Test
+    void getChildAlertNow() {
+        AlertsService alertsServiceSpy = Mockito.spy(alertsService);
+        ZonedDateTime[] overloadedArg = new ZonedDateTime[1];
+        doAnswer(ctx -> {
+            overloadedArg[0] = ctx.getArgument(1);
+            return null;
+        }).when(alertsServiceSpy).getChildAlert(eq("A"), any(ZonedDateTime.class));
+        alertsServiceSpy.getChildAlert("A");
+        assertThat(Duration.between(ZonedDateTime.now(), overloadedArg[0]).abs()).isLessThan(Duration.ofSeconds(1));
     }
 
     @Test
@@ -150,6 +180,18 @@ class AlertsServiceTest {
     }
 
     @Test
+    void getFireNow() {
+        AlertsService alertsServiceSpy = Mockito.spy(alertsService);
+        ZonedDateTime[] overloadedArg = new ZonedDateTime[1];
+        doAnswer(ctx -> {
+            overloadedArg[0] = ctx.getArgument(1);
+            return null;
+        }).when(alertsServiceSpy).getFire(eq("A"), any(ZonedDateTime.class));
+        alertsServiceSpy.getFire("A");
+        assertThat(Duration.between(ZonedDateTime.now(), overloadedArg[0]).abs()).isLessThan(Duration.ofSeconds(1));
+    }
+
+    @Test
     void getFloodStations() {
         AddressEntity address1 = factory.manufacturePojo(AddressEntity.class);
         AddressEntity address2 = factory.manufacturePojo(AddressEntity.class);
@@ -179,6 +221,18 @@ class AlertsServiceTest {
     }
 
     @Test
+    void getFloodStationsNow() {
+        AlertsService alertsServiceSpy = Mockito.spy(alertsService);
+        ZonedDateTime[] overloadedArg = new ZonedDateTime[1];
+        doAnswer(ctx -> {
+            overloadedArg[0] = ctx.getArgument(1);
+            return null;
+        }).when(alertsServiceSpy).getFloodStations(eq(Collections.singletonList("A")), any(ZonedDateTime.class));
+        alertsServiceSpy.getFloodStations(Collections.singletonList("A"));
+        assertThat(Duration.between(ZonedDateTime.now(), overloadedArg[0]).abs()).isLessThan(Duration.ofSeconds(1));
+    }
+
+    @Test
     void getPersonInfo() {
         PersonEntity person1 = factory.manufacturePojo(PersonEntity.class);
         PersonEntity person2 = factory.manufacturePojo(PersonEntity.class);
@@ -191,6 +245,18 @@ class AlertsServiceTest {
                 .person(personMapper.toCompletePerson(person1, now, true))
                 .person(personMapper.toCompletePerson(person2, now, true))
                 .build(), res);
+    }
+
+    @Test
+    void getPersonInfoNow() {
+        AlertsService alertsServiceSpy = Mockito.spy(alertsService);
+        ZonedDateTime[] overloadedArg = new ZonedDateTime[1];
+        doAnswer(ctx -> {
+            overloadedArg[0] = ctx.getArgument(2);
+            return null;
+        }).when(alertsServiceSpy).getPersonInfo(eq("A"), eq("B"), any(ZonedDateTime.class));
+        alertsServiceSpy.getPersonInfo("A", "B");
+        assertThat(Duration.between(ZonedDateTime.now(), overloadedArg[0]).abs()).isLessThan(Duration.ofSeconds(1));
     }
 
     @Test

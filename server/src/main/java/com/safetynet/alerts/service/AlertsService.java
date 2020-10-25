@@ -32,6 +32,7 @@ public class AlertsService {
     private final PersonRepository personRepository;
     private final PersonMapper personMapper;
 
+    @Transactional(readOnly = true)
     public PersonsCoveredByFirestationResponse getPersonsCoveredByFirestation(String stationNumber) {
         return getPersonsCoveredByFirestation(stationNumber, ZonedDateTime.now());
     }
@@ -54,6 +55,7 @@ public class AlertsService {
         return res.adultsCount(adultsCount).childrenCount(childrenCount).build();
     }
 
+    @Transactional(readOnly = true)
     public ChildAlertResponse getChildAlert(String address) {
         return getChildAlert(address, ZonedDateTime.now());
     }
@@ -84,6 +86,7 @@ public class AlertsService {
         return PhoneAlertResponse.builder().phones(phones).build();
     }
 
+    @Transactional(readOnly = true)
     public FireResponse getFire(String address) {
         return getFire(address, ZonedDateTime.now());
     }
@@ -100,6 +103,7 @@ public class AlertsService {
         return res.build();
     }
 
+    @Transactional(readOnly = true)
     public FloodStationsResponse getFloodStations(List<String> stations) {
         return getFloodStations(stations, ZonedDateTime.now());
     }
@@ -122,6 +126,7 @@ public class AlertsService {
         return res.build();
     }
 
+    @Transactional(readOnly = true)
     public PersonInfoResponse getPersonInfo(String firstName, String lastName) {
         return getPersonInfo(firstName, lastName, ZonedDateTime.now());
     }
