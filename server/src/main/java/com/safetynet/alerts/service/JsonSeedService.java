@@ -13,7 +13,7 @@ import com.safetynet.alerts.repository.entity.PersonEntity;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -57,19 +57,27 @@ public class JsonSeedService {
         if (enabled && isDatabaseEmpty()) {
             // Only seed the database at the first usage
             logger.debug("Seeding database with data.json");
-            Models models = readSeedDataFromResource(objectMapper, "/data.json");
+            Models models = readSeedDataFromResource("/data.json");
             Entities entities = seedDataToEntities(models);
             personRepository.saveAll(entities.getPersons());
         }
     }
 
-    private boolean isDatabaseEmpty() {
+    boolean isDatabaseEmpty() {
         return addressRepository.count() == 0
                 && personRepository.count() == 0;
     }
 
-    public static Models readSeedDataFromResource(ObjectMapper objectMapper, String resourcePath) {
+    Models readSeedDataFromResource(String resourcePath) {
         try (InputStream is = JsonSeedService.class.getResourceAsStream(resourcePath)) {
+            return readSeedDataFromResource(is);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    Models readSeedDataFromResource(InputStream is) {
+        try {
             return objectMapper.readValue(is, Models.class);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -77,8 +85,8 @@ public class JsonSeedService {
     }
 
     public static Entities seedDataToEntities(Models models) {
-        Map<String, AddressEntity> addresses = new HashMap<>();
-        Map<Person.Key, PersonEntity> persons = new HashMap<>();
+        Map<String, AddressEntity> addresses = new LinkedHashMap<>();
+        Map<Person.Key, PersonEntity> persons = new LinkedHashMap<>();
 
         for (Person person : models.getPersons()) {
             // Extract addresses
