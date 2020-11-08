@@ -1,0 +1,1871 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "SafetyNet Alerts API",
+    "version": "1.0",
+    "description": "<a href=\"https://github.com/np111/P5_safetynet\">View Source on GitHub</a>"
+  },
+  "servers": [],
+  "tags": [
+    {
+      "name": "person",
+      "description": "CRUD operations about persons"
+    },
+    {
+      "name": "medical record",
+      "description": "CRUD operations about medical records"
+    },
+    {
+      "name": "firestation",
+      "description": "CRUD operations about firestations"
+    },
+    {
+      "name": "alerts",
+      "description": "Alerts operations"
+    }
+  ],
+  "paths": {
+    "/childAlert": {
+      "get": {
+        "tags": [
+          "alerts"
+        ],
+        "summary": "Returns the list of persons living at an address.",
+        "operationId": "getChildAlert",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChildAlertResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`CLIENT`/`VALIDATION_FAILED` - A request parameter validation failed:\n- *address*: NotNull, IsAddress",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "CLIENT",
+                  "status": 400,
+                  "code": "VALIDATION_FAILED",
+                  "message": "Validation failed",
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/firestation": {
+      "get": {
+        "tags": [
+          "alerts"
+        ],
+        "summary": "Returns the list of persons covered by a firestation.",
+        "operationId": "getPersonsCoveredByFirestation",
+        "parameters": [
+          {
+            "name": "stationNumber",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonsCoveredByFirestationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`CLIENT`/`VALIDATION_FAILED` - A request parameter validation failed:\n- *stationNumber*: NotNull, IsStationNumber",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "CLIENT",
+                  "status": 400,
+                  "code": "VALIDATION_FAILED",
+                  "message": "Validation failed",
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "firestation"
+        ],
+        "summary": "Add or update a firestation.",
+        "operationId": "updateFirestation",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "query",
+            "description": "Address of firestation that needs to be updated.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Firestation"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "`CLIENT`/`VALIDATION_FAILED` - A request parameter validation failed:\n- *address*: NotNull, IsAddress\n- *body*: NotNull\n  - *address*: NotNull, IsAddress\n  - *station*: NotNull, IsStationNumber",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "CLIENT",
+                  "status": 400,
+                  "code": "VALIDATION_FAILED",
+                  "message": "Validation failed",
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "400'": {
+            "description": "`CLIENT`/`BAD_REQUEST` - Address cannot be updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "CLIENT",
+                  "status": 400,
+                  "code": "BAD_REQUEST",
+                  "message": "address cannot be updated",
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "firestation"
+        ],
+        "summary": "Add a new firestation.",
+        "operationId": "createFirestation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Firestation"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "`CLIENT`/`VALIDATION_FAILED` - A request parameter validation failed:\n- *body*: NotNull\n  - *address*: NotNull, IsAddress\n  - *station*: NotNull, IsStationNumber",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "CLIENT",
+                  "status": 400,
+                  "code": "VALIDATION_FAILED",
+                  "message": "Validation failed",
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "firestation"
+        ],
+        "summary": "Deletes a firestation.",
+        "operationId": "deleteFirestation",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "query",
+            "description": "Address of firestation that needs to be deleted.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "`CLIENT`/`VALIDATION_FAILED` - A request parameter validation failed:\n- *address*: NotNull, IsAddress",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "CLIENT",
+                  "status": 400,
+                  "code": "VALIDATION_FAILED",
+                  "message": "Validation failed",
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`SERVICE`/`NOT_FOUND` - Firestation not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "SERVICE",
+                  "status": 404,
+                  "code": "NOT_FOUND",
+                  "message": "Firestation not found",
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/phoneAlert": {
+      "get": {
+        "tags": [
+          "alerts"
+        ],
+        "summary": "Returns the list of phones of persons covered by a firestation.",
+        "operationId": "getPhoneAlert",
+        "parameters": [
+          {
+            "name": "firestation",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhoneAlertResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`CLIENT`/`VALIDATION_FAILED` - A request parameter validation failed:\n- *firestation*: NotNull, IsStationNumber",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "CLIENT",
+                  "status": 400,
+                  "code": "VALIDATION_FAILED",
+                  "message": "Validation failed",
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fire": {
+      "get": {
+        "tags": [
+          "alerts"
+        ],
+        "summary": "Returns the list of persons living at an address and the firestation covering them.",
+        "operationId": "getFire",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FireResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`CLIENT`/`VALIDATION_FAILED` - A request parameter validation failed:\n- *address*: NotNull, IsAddress",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "CLIENT",
+                  "status": 400,
+                  "code": "VALIDATION_FAILED",
+                  "message": "Validation failed",
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/flood/stations": {
+      "get": {
+        "tags": [
+          "alerts"
+        ],
+        "summary": "Returns the list of persons covered by the given firestation (grouped by address).",
+        "operationId": "getFloodStations",
+        "parameters": [
+          {
+            "name": "stations",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FloodStationsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`CLIENT`/`VALIDATION_FAILED` - A request parameter validation failed:\n- *stations*: NotNull, NotEmpty\n  - *[entry]*: NotNull, IsStationNumber",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "CLIENT",
+                  "status": 400,
+                  "code": "VALIDATION_FAILED",
+                  "message": "Validation failed",
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/personInfo": {
+      "get": {
+        "tags": [
+          "alerts"
+        ],
+        "summary": "Returns the list of persons with a given first name and last name.",
+        "operationId": "getPersonInfo",
+        "parameters": [
+          {
+            "name": "firstName",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastName",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonInfoResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`CLIENT`/`VALIDATION_FAILED` - A request parameter validation failed:\n- *firstName*: NotNull, IsName\n- *lastName*: NotNull, IsName",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "CLIENT",
+                  "status": 400,
+                  "code": "VALIDATION_FAILED",
+                  "message": "Validation failed",
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/communityEmail": {
+      "get": {
+        "tags": [
+          "alerts"
+        ],
+        "summary": "Returns the list of emails of persons living in a city.",
+        "operationId": "getCommunityEmail",
+        "parameters": [
+          {
+            "name": "city",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommunityEmailResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`CLIENT`/`VALIDATION_FAILED` - A request parameter validation failed:\n- *city*: NotNull, IsCity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "CLIENT",
+                  "status": 400,
+                  "code": "VALIDATION_FAILED",
+                  "message": "Validation failed",
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/firestation/get": {
+      "get": {
+        "tags": [
+          "firestation"
+        ],
+        "summary": "Find firestation by address.",
+        "operationId": "getFirestation",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "query",
+            "description": "Address of firestation to return.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Firestation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`CLIENT`/`VALIDATION_FAILED` - A request parameter validation failed:\n- *address*: NotNull, IsAddress",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "CLIENT",
+                  "status": 400,
+                  "code": "VALIDATION_FAILED",
+                  "message": "Validation failed",
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`SERVICE`/`NOT_FOUND` - Firestation not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "SERVICE",
+                  "status": 404,
+                  "code": "NOT_FOUND",
+                  "message": "Firestation not found",
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/medicalRecord/{personId}": {
+      "get": {
+        "tags": [
+          "medical record"
+        ],
+        "summary": "Find medical record by ID.",
+        "operationId": "getMedicalRecord",
+        "parameters": [
+          {
+            "name": "personId",
+            "in": "path",
+            "description": "ID of medical record to return.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MedicalRecord"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`CLIENT`/`VALIDATION_FAILED` - A request parameter validation failed:\n- *personId*: NotNull",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "CLIENT",
+                  "status": 400,
+                  "code": "VALIDATION_FAILED",
+                  "message": "Validation failed",
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`SERVICE`/`NOT_FOUND` - Medical record not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "SERVICE",
+                  "status": 404,
+                  "code": "NOT_FOUND",
+                  "message": "Medical record not found",
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "medical record"
+        ],
+        "summary": "Update an existing medical record.",
+        "operationId": "updateMedicalRecord",
+        "parameters": [
+          {
+            "name": "personId",
+            "in": "path",
+            "description": "ID of medical record that needs to be updated.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MedicalRecord"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "`CLIENT`/`VALIDATION_FAILED` - A request parameter validation failed:\n- *personId*: NotNull\n- *body*: NotNull\n  - *firstName*: IsName\n  - *lastName*: IsName\n  - *birthdate*: NotNull\n  - *medications*: NotNull, IsMedicationCollection\n    - *[entry]*: NotNull, IsMedication\n  - *allergies*: NotNull, IsAllergyCollection\n    - *[entry]*: NotNull, IsAllergy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "CLIENT",
+                  "status": 400,
+                  "code": "VALIDATION_FAILED",
+                  "message": "Validation failed",
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`SERVICE`/`NOT_FOUND` - Medical record not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "SERVICE",
+                  "status": 404,
+                  "code": "NOT_FOUND",
+                  "message": "Medical record not found",
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "medical record"
+        ],
+        "summary": "Deletes a medical record.",
+        "operationId": "deleteMedicalRecord",
+        "parameters": [
+          {
+            "name": "personId",
+            "in": "path",
+            "description": "ID of medical record that needs to be deleted.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "`CLIENT`/`VALIDATION_FAILED` - A request parameter validation failed:\n- *personId*: NotNull",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "CLIENT",
+                  "status": 400,
+                  "code": "VALIDATION_FAILED",
+                  "message": "Validation failed",
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`SERVICE`/`NOT_FOUND` - Medical record not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "SERVICE",
+                  "status": 404,
+                  "code": "NOT_FOUND",
+                  "message": "Medical record not found",
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/medicalRecord": {
+      "put": {
+        "tags": [
+          "medical record"
+        ],
+        "summary": "Update an existing medical record by person first and last name.",
+        "operationId": "updateMedicalRecordByNames",
+        "parameters": [
+          {
+            "name": "firstName",
+            "in": "query",
+            "description": "First name of person whose medical record needs to be updated.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastName",
+            "in": "query",
+            "description": "Last name of person whose medical record needs to be updated.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MedicalRecord"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "`CLIENT`/`VALIDATION_FAILED` - A request parameter validation failed:\n- *firstName*: NotNull, IsName\n- *lastName*: NotNull, IsName\n- *body*: NotNull\n  - *firstName*: IsName\n  - *lastName*: IsName\n  - *birthdate*: NotNull\n  - *medications*: NotNull, IsMedicationCollection\n    - *[entry]*: NotNull, IsMedication\n  - *allergies*: NotNull, IsAllergyCollection\n    - *[entry]*: NotNull, IsAllergy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "CLIENT",
+                  "status": 400,
+                  "code": "VALIDATION_FAILED",
+                  "message": "Validation failed",
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`SERVICE`/`NOT_FOUND` - Medical record not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "SERVICE",
+                  "status": 404,
+                  "code": "NOT_FOUND",
+                  "message": "Medical record not found",
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`SERVICE`/`INTERFERING_NAMES` - Multiple medical records share this names combination, use ID instead",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "SERVICE",
+                  "status": 409,
+                  "code": "INTERFERING_NAMES",
+                  "message": "Multiple medical records share this names combination, use ID instead",
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "medical record"
+        ],
+        "summary": "Add a new medical record.",
+        "operationId": "createMedicalRecord",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MedicalRecord"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "`CLIENT`/`VALIDATION_FAILED` - A request parameter validation failed:\n- *body*: NotNull\n  - *firstName*: IsName\n  - *lastName*: IsName\n  - *birthdate*: NotNull\n  - *medications*: NotNull, IsMedicationCollection\n    - *[entry]*: NotNull, IsMedication\n  - *allergies*: NotNull, IsAllergyCollection\n    - *[entry]*: NotNull, IsAllergy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "CLIENT",
+                  "status": 400,
+                  "code": "VALIDATION_FAILED",
+                  "message": "Validation failed",
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`SERVICE`/`INTERFERING_NAMES` - Multiple medical records share this names combination, use ID instead",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "SERVICE",
+                  "status": 409,
+                  "code": "INTERFERING_NAMES",
+                  "message": "Multiple medical records share this names combination, use ID instead",
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`SERVICE`/`NOT_FOUND` - The person linked to this medical record cannot be found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "SERVICE",
+                  "status": 404,
+                  "code": "NOT_FOUND",
+                  "message": "The person linked to this medical record cannot be found",
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "409'": {
+            "description": "`SERVICE`/`ALREADY_EXISTS` - A medical record already exists for this person",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "SERVICE",
+                  "status": 409,
+                  "code": "ALREADY_EXISTS",
+                  "message": "A medical record already exists for this person",
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "medical record"
+        ],
+        "summary": "Deletes a medical record by person first and last name.",
+        "operationId": "deleteMedicalRecordByNames",
+        "parameters": [
+          {
+            "name": "firstName",
+            "in": "query",
+            "description": "First name of person whose medical record needs to be deleted.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastName",
+            "in": "query",
+            "description": "Last name of person whose medical record needs to be deleted.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "`CLIENT`/`VALIDATION_FAILED` - A request parameter validation failed:\n- *firstName*: NotNull, IsName\n- *lastName*: NotNull, IsName",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "CLIENT",
+                  "status": 400,
+                  "code": "VALIDATION_FAILED",
+                  "message": "Validation failed",
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`SERVICE`/`NOT_FOUND` - Medical record not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "SERVICE",
+                  "status": 404,
+                  "code": "NOT_FOUND",
+                  "message": "Medical record not found",
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`SERVICE`/`INTERFERING_NAMES` - Multiple medical records share this names combination, use ID instead",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "SERVICE",
+                  "status": 409,
+                  "code": "INTERFERING_NAMES",
+                  "message": "Multiple medical records share this names combination, use ID instead",
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/person/{id}": {
+      "get": {
+        "tags": [
+          "person"
+        ],
+        "summary": "Find person by ID.",
+        "operationId": "getPerson",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of person to return.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Person"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`CLIENT`/`VALIDATION_FAILED` - A request parameter validation failed:\n- *id*: NotNull",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "CLIENT",
+                  "status": 400,
+                  "code": "VALIDATION_FAILED",
+                  "message": "Validation failed",
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`SERVICE`/`NOT_FOUND` - Person not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "SERVICE",
+                  "status": 404,
+                  "code": "NOT_FOUND",
+                  "message": "Person not found",
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "person"
+        ],
+        "summary": "Update an existing person.",
+        "operationId": "updatePerson",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of person that needs to be updated.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "allowSimilarNames",
+            "in": "query",
+            "description": "Allow update of this new person even if another person has the same first and last name combination.",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Person"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "`CLIENT`/`VALIDATION_FAILED` - A request parameter validation failed:\n- *id*: NotNull\n- *body*: NotNull\n  - *firstName*: NotNull, IsName\n  - *lastName*: NotNull, IsName\n  - *address*: NotNull, IsAddress\n  - *city*: NotNull, IsCity\n  - *zip*: NotNull, IsZip\n  - *phone*: NotNull, IsPhone\n  - *email*: NotNull, IsEmail\n  - *medications*:\n    - *[entry]*: NotNull, IsMedication\n  - *allergies*:\n    - *[entry]*: NotNull, IsAllergy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "CLIENT",
+                  "status": 400,
+                  "code": "VALIDATION_FAILED",
+                  "message": "Validation failed",
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`SERVICE`/`NOT_FOUND` - Person not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "SERVICE",
+                  "status": 404,
+                  "code": "NOT_FOUND",
+                  "message": "Person not found",
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "*if (allowSimilarNames == false):*\n>`SERVICE`/`ALREADY_EXISTS` - A person with a similar names combination already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "SERVICE",
+                  "status": 409,
+                  "code": "ALREADY_EXISTS",
+                  "message": "A person with a similar names combination already exists",
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "409'": {
+            "description": "`SERVICE`/`INTERFERING_ADDRESS` - A matching address already exists with a different city/zip combination",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "SERVICE",
+                  "status": 409,
+                  "code": "INTERFERING_ADDRESS",
+                  "message": "A matching address already exists with a different city/zip combination",
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "person"
+        ],
+        "summary": "Deletes a person.",
+        "operationId": "deletePerson",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of person that needs to be deleted.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "`CLIENT`/`VALIDATION_FAILED` - A request parameter validation failed:\n- *id*: NotNull",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "CLIENT",
+                  "status": 400,
+                  "code": "VALIDATION_FAILED",
+                  "message": "Validation failed",
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`SERVICE`/`NOT_FOUND` - Person not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "SERVICE",
+                  "status": 404,
+                  "code": "NOT_FOUND",
+                  "message": "Person not found",
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/person": {
+      "put": {
+        "tags": [
+          "person"
+        ],
+        "summary": "Update an existing person by first and last name.",
+        "operationId": "updatePersonByNames",
+        "parameters": [
+          {
+            "name": "firstName",
+            "in": "query",
+            "description": "First name of person that needs to be updated.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastName",
+            "in": "query",
+            "description": "Last name of person that needs to be updated.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Person"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "`CLIENT`/`VALIDATION_FAILED` - A request parameter validation failed:\n- *firstName*: NotNull, IsName\n- *lastName*: NotNull, IsName\n- *body*: NotNull\n  - *firstName*: NotNull, IsName\n  - *lastName*: NotNull, IsName\n  - *address*: NotNull, IsAddress\n  - *city*: NotNull, IsCity\n  - *zip*: NotNull, IsZip\n  - *phone*: NotNull, IsPhone\n  - *email*: NotNull, IsEmail\n  - *medications*:\n    - *[entry]*: NotNull, IsMedication\n  - *allergies*:\n    - *[entry]*: NotNull, IsAllergy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "CLIENT",
+                  "status": 400,
+                  "code": "VALIDATION_FAILED",
+                  "message": "Validation failed",
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`SERVICE`/`NOT_FOUND` - Person not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "SERVICE",
+                  "status": 404,
+                  "code": "NOT_FOUND",
+                  "message": "Person not found",
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`SERVICE`/`INTERFERING_NAMES` - Multiple persons share this names combination, use ID instead",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "SERVICE",
+                  "status": 409,
+                  "code": "INTERFERING_NAMES",
+                  "message": "Multiple persons share this names combination, use ID instead",
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "409'": {
+            "description": "`SERVICE`/`ALREADY_EXISTS` - A person with a similar names combination already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "SERVICE",
+                  "status": 409,
+                  "code": "ALREADY_EXISTS",
+                  "message": "A person with a similar names combination already exists",
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "409''": {
+            "description": "`SERVICE`/`INTERFERING_ADDRESS` - A matching address already exists with a different city/zip combination",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "SERVICE",
+                  "status": 409,
+                  "code": "INTERFERING_ADDRESS",
+                  "message": "A matching address already exists with a different city/zip combination",
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "400'": {
+            "description": "`CLIENT`/`BAD_REQUEST` - FirstName and lastName cannot be updated in this context, use ID instead",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "CLIENT",
+                  "status": 400,
+                  "code": "BAD_REQUEST",
+                  "message": "firstName and lastName cannot be updated in this context, use ID instead",
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "person"
+        ],
+        "summary": "Add a new person.",
+        "operationId": "createPerson",
+        "parameters": [
+          {
+            "name": "allowSimilarNames",
+            "in": "query",
+            "description": "Allow creation of this new person even if another person has the same first and last name combination.",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Person"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "`CLIENT`/`VALIDATION_FAILED` - A request parameter validation failed:\n- *body*: NotNull\n  - *firstName*: NotNull, IsName\n  - *lastName*: NotNull, IsName\n  - *address*: NotNull, IsAddress\n  - *city*: NotNull, IsCity\n  - *zip*: NotNull, IsZip\n  - *phone*: NotNull, IsPhone\n  - *email*: NotNull, IsEmail\n  - *medications*:\n    - *[entry]*: NotNull, IsMedication\n  - *allergies*:\n    - *[entry]*: NotNull, IsAllergy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "CLIENT",
+                  "status": 400,
+                  "code": "VALIDATION_FAILED",
+                  "message": "Validation failed",
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "*if (allowSimilarNames == false):*\n>`SERVICE`/`ALREADY_EXISTS` - A person with a similar names combination already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "SERVICE",
+                  "status": 409,
+                  "code": "ALREADY_EXISTS",
+                  "message": "A person with a similar names combination already exists",
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "409'": {
+            "description": "`SERVICE`/`INTERFERING_ADDRESS` - A matching address already exists with a different city/zip combination",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "SERVICE",
+                  "status": 409,
+                  "code": "INTERFERING_ADDRESS",
+                  "message": "A matching address already exists with a different city/zip combination",
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "person"
+        ],
+        "summary": "Deletes a person by first and last name.",
+        "operationId": "deletePersonByNames",
+        "parameters": [
+          {
+            "name": "firstName",
+            "in": "query",
+            "description": "First name of person that needs to be deleted.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastName",
+            "in": "query",
+            "description": "Last name of person that needs to be deleted.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "`CLIENT`/`VALIDATION_FAILED` - A request parameter validation failed:\n- *firstName*: NotNull, IsName\n- *lastName*: NotNull, IsName",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "CLIENT",
+                  "status": 400,
+                  "code": "VALIDATION_FAILED",
+                  "message": "Validation failed",
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`SERVICE`/`NOT_FOUND` - Person not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "SERVICE",
+                  "status": 404,
+                  "code": "NOT_FOUND",
+                  "message": "Person not found",
+                  "metadata": {}
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`SERVICE`/`INTERFERING_NAMES` - Multiple persons share this names combination, use ID instead",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "type": "SERVICE",
+                  "status": 409,
+                  "code": "INTERFERING_NAMES",
+                  "message": "Multiple persons share this names combination, use ID instead",
+                  "metadata": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ChildAlertResponse": {
+        "type": "object",
+        "properties": {
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Person"
+            }
+          },
+          "adults": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Person"
+            }
+          }
+        }
+      },
+      "Person": {
+        "required": [
+          "address",
+          "city",
+          "email",
+          "firstName",
+          "lastName",
+          "phone",
+          "zip"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "zip": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "birthdate": {
+            "type": "string",
+            "format": "date"
+          },
+          "age": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "medications": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "allergies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "description": "Person object that needs to be added."
+      },
+      "PersonsCoveredByFirestationResponse": {
+        "type": "object",
+        "properties": {
+          "childrenCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "adultsCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "persons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Person"
+            }
+          }
+        }
+      },
+      "PhoneAlertResponse": {
+        "type": "object",
+        "properties": {
+          "phones": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "FireResponse": {
+        "type": "object",
+        "properties": {
+          "stationNumber": {
+            "type": "string"
+          },
+          "persons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Person"
+            }
+          }
+        }
+      },
+      "Entry": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "persons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Person"
+            }
+          }
+        }
+      },
+      "FloodStationsResponse": {
+        "type": "object",
+        "properties": {
+          "stations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Entry"
+            }
+          }
+        }
+      },
+      "PersonInfoResponse": {
+        "type": "object",
+        "properties": {
+          "persons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Person"
+            }
+          }
+        }
+      },
+      "CommunityEmailResponse": {
+        "type": "object",
+        "properties": {
+          "emails": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "Firestation": {
+        "required": [
+          "address",
+          "station"
+        ],
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "station": {
+            "type": "string"
+          }
+        },
+        "description": "New firestation object."
+      },
+      "MedicalRecord": {
+        "required": [
+          "allergies",
+          "birthdate",
+          "medications"
+        ],
+        "type": "object",
+        "properties": {
+          "personId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "birthdate": {
+            "type": "string",
+            "format": "date"
+          },
+          "medications": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "allergies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "description": "New medical record object."
+      },
+      "ApiError": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "CLIENT",
+              "SERVICE",
+              "UNKNOWN"
+            ]
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+com.safetynet.alerts
+com.safetynet.alerts.actuator
+com.safetynet.alerts.config
+com.safetynet.alerts.http.controller
+com.safetynet.alerts.http.filter
+com.safetynet.alerts.properties
+com.safetynet.alerts.repository
+com.safetynet.alerts.repository.entity
+com.safetynet.alerts.repository.mapper
+com.safetynet.alerts.service
+com.safetynet.alerts.util
+com.safetynet.alerts.util.exception
+com.safetynet.alerts.util.spring
+com.safetynet.alerts.util.springdoc
