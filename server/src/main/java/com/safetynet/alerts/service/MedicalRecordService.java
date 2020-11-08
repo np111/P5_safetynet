@@ -37,7 +37,7 @@ public class MedicalRecordService {
     /**
      * Create a new {@linkplain MedicalRecord medical record}.
      *
-     * @param body data (personId is ignored)
+     * @param body data
      * @return the created medical record
      * @throws InterferingNamesException    if more than one person matches this medical record
      * @throws PersonNotFoundException      if no person matches this medical record
@@ -45,7 +45,6 @@ public class MedicalRecordService {
      */
     @Transactional
     public UpdateResult createMedicalRecord(MedicalRecord body) {
-        body.setPersonId(null);
         return update(null, body);
     }
 
