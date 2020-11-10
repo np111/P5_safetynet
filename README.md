@@ -1,6 +1,9 @@
-# SafetyNet Alerts &middot; [![Build Status](https://travis-ci.com/np111/P5_safetynet.svg?branch=master)](https://travis-ci.com/np111/P5_safetynet) [![codecov.io](https://codecov.io/github/np111/P5_safetynet/coverage.svg?branch=master)](https://codecov.io/github/np111/P5_safetynet?branch=master)
+# [![SafetyNet Alerts](.readme/logo.png?raw=true)](https://github.com/np111/P5_safetynet)
+[![Build Status](https://travis-ci.com/np111/P5_safetynet.svg?branch=master)](https://travis-ci.com/np111/P5_safetynet) [![codecov.io](https://codecov.io/github/np111/P5_safetynet/coverage.svg?branch=master)](https://codecov.io/github/np111/P5_safetynet?branch=master)
 
 SafetyNet Alerts is a REST API that sends information to emergency services!
+
+[![SafetyNet Alerts](.readme/console.png?raw=true)](https://github.com/np111/P5_safetynet)
 
 ## Documentation
 
